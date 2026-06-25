@@ -5,7 +5,7 @@ from torchinfo import summary
 num_class = 2
 def densenet_model(num_class):
     weight = models.DenseNet121_Weights.DEFAULT # mặc định thấy trọng số tốt nhất
-    model = models.densenet(weight)
+    model = models.densenet121(weights=weight)
 
     ori_feature = model.classifier.in_features
     model.classifier = nn.Linear(in_features=ori_feature, out_features=num_class)

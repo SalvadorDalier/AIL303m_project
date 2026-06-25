@@ -4,7 +4,9 @@ import torchvision.models as models
 from torchinfo import summary
 
 def googlenet_model(num_class=2):
-    model = models.googlenet(weights=models.GoogLeNet_Weights.DEFAULT)
+    weight = models.GoogLeNet_Weights.DEFAULT
+    model = models.googlenet(weight)
+    
     model.aux_logits = False
     ori_feature = model.fc.in_features
     model.fc = nn.Linear(in_features=ori_feature, out_features=num_class)
