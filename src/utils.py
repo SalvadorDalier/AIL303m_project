@@ -7,11 +7,12 @@ import matplotlib.pyplot as plt
 # ============================================================
 NUM_CLASS    = 2
 CLASS_NAMES  = ["healthy", "unhealthy"]
-DEVICE       = 'cuda' if torch.cuda.is_available() else 'cpu'
+DEVICE       = 'cuda' if torch.cuda.is_available() else print('Cant execute because this model need to be run on GPU ')
 
+from pathlib import Path
 # Paths
-PROJECT_DIR  = r"C:\Users\Lenovo\Desktop\AIL303m_project"
-SAVE_DIR     = PROJECT_DIR + r"\output"
+PROJECT_DIR  = str(Path(__file__).resolve().parent.parent)
+SAVE_DIR     = str(Path(PROJECT_DIR) / "output")
 
 # Plot
 FIGURE_SIZE  = (14, 5)
@@ -146,7 +147,7 @@ def plot_curves(history, model_name="model", save_dir=SAVE_DIR):
 # Test nhanh (chay doc lap de kiem tra)
 # ============================================================
 if __name__ == "__main__":
-    # --- Test plot_curves voi du lieu gia ---
+    # # --- Test plot_curves voi du lieu gia ---
     dummy_history = {
         'train_acc': [55, 65, 72, 78, 83, 87, 90, 92, 93, 94],
         'val_acc':   [50, 60, 68, 73, 77, 80, 82, 84, 85, 85],

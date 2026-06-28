@@ -10,8 +10,10 @@ NUM_WORKERS  = 2
 IMG_SIZE     = 224
 
 # Paths
-TRAIN_DIR    = r"C:\Users\Lenovo\Desktop\AIL303m_project\data\train"
-VALID_DIR    = r"C:\Users\Lenovo\Desktop\AIL303m_project\data\valid"
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+TRAIN_DIR    = str(PROJECT_ROOT / "data" / "preprocessed" / "train")
+VALID_DIR    = str(PROJECT_ROOT / "data" / "preprocessed" / "valid")
 
 # ============================================================
 # Transforms
@@ -39,23 +41,23 @@ valid_transforms = transforms.Compose([
 # ============================================================
 # DataLoader
 # ============================================================
-def dataloader():
+def dataloader(batch_size=BATCH_SIZE, num_workers=NUM_WORKERS):
     """Tra ve train_loader va valid_loader."""
     train_dataset = datasets.ImageFolder(root=TRAIN_DIR, transform=train_transforms)
     valid_dataset = datasets.ImageFolder(root=VALID_DIR, transform=valid_transforms)
 
     train_loader = DataLoader(
         train_dataset,
-        batch_size=BATCH_SIZE,
+        batch_size=batch_size,
         shuffle=True,
-        num_workers=NUM_WORKERS,
+        num_workers=num_workers,
     )
 
     valid_loader = DataLoader(
         valid_dataset,
-        batch_size=BATCH_SIZE,
+        batch_size=batch_size,
         shuffle=False,
-        num_workers=NUM_WORKERS,
+        num_workers=num_workers,
     )
 
     return train_loader, valid_loader
