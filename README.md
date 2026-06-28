@@ -110,6 +110,35 @@ python src/model/googlenet22.py
 python src/model/densenet121.py
 ```
 
+### Train a model
+
+You can train a model using `train.py` inside the `src/` directory.
+
+```powershell
+cd src
+# Train GoogLeNet (Inception v1) for 10 epochs
+python train.py --model googlenet22 --epoch 10 --batch 32
+
+# Train DenseNet-121 for 15 epochs with a progress bar
+python train.py --model densenet121 --epoch 15 --batch 16 --verbose 2
+```
+
+Arguments:
+- `--model`: Choose model (`googlenet22` or `densenet121`). Default is `googlenet22`.
+- `--epoch`: Number of training epochs. Default is `10`.
+- `--batch`: Batch size. Default is `32`.
+- `--worker`: Number of worker threads for dataloader. Default is `2`.
+- `--verbose`: Display mode: `0` (silent), `1` (epoch summaries), `2` (detailed progress bar). Default is `2`.
+
+### Evaluate models
+
+To evaluate the trained models on the validation dataset:
+
+```powershell
+cd src
+python evaluate.py
+```
+
 ### Run benchmark / Grad-CAM
 
 ```powershell
@@ -117,7 +146,7 @@ cd src
 python gradcam.py
 ```
 
-> **Note:** `gradcam.py` uses relative imports (`from model.* import ...`), so it must be run from the `src/` directory.
+> **Note:** Scripts inside `src/` (`train.py`, `evaluate.py`, `gradcam.py`) use relative imports, so they must be run from the `src/` directory.
 
 ### Generate synthetic fruit images
 
@@ -133,6 +162,23 @@ The project includes a **Conditional GAN (CGAN)** pipeline for generating synthe
 - `cgan_generator_1000.h5`
 - `cgan_generator_1500.h5`
 
+## Tracking Experiments
+
+We keep a diary/log of all training runs, model configurations, hyperparameters, and results to monitor progress and avoid redundant experiments.
+
+Please document every training attempt in:
+- **File:** [`experiment_log.md`](experiment_log.md)
+
+### What to record:
+1. **Date & Time:** When the run was executed.
+2. **Model Details:** Model name, configuration modifications.
+3. **Hyperparameters:** Batch size, learning rate (LR), total epochs, optimizer type.
+4. **Metrics:** Best Train/Val Loss, best Train/Val Accuracy.
+5. **Notes (Crucial):** Observations (e.g., overfitting behavior, training speed, anomalies, potential next steps).
+
+---
+
 ## License
 
 This project is for academic use as part of the **AIL303m** course.
+
