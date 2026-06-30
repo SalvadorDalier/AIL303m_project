@@ -3,6 +3,9 @@ import gc
 
 from model.googlenet22 import googlenet_model
 from model.densenet121 import densenet_model
+from model.resnet50 import resnet50_model
+from model.vgg16 import vgg16_model
+from model.vgg19 import vgg19_model
 from dataset import dataloader
 from utils import compute_precision_recall, print_metrics
 
@@ -12,7 +15,10 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 def evaluate_all():
     models = [
         {"name": "googlenet22", "weight_path": str(PROJECT_ROOT / "weights" / "googlenet.npy")},
-        {"name": "densenet121", "weight_path": None}
+        {"name": "densenet121", "weight_path": str(PROJECT_ROOT / "weights" / "densenet.npy")},
+        {"name": "resnet50", "weight_path": str(PROJECT_ROOT / "weights" / "resnet50.npy")},
+        {"name": "vgg16", "weight_path": str(PROJECT_ROOT / "weights" / "vgg16.npy")},
+        {"name": "vgg19", "weight_path": str(PROJECT_ROOT / "weights" / "vgg19.npy")}
     ]
     
     for m in models:
@@ -23,6 +29,12 @@ def get_model(name, num_class=2, weight_path=None):
         model = googlenet_model(num_class)
     elif name == "densenet121": 
         model = densenet_model(num_class)
+    elif name == "resnet50": 
+        model = resnet50_model(num_class)
+    elif name == "vgg16": 
+        model = vgg16_model(num_class)
+    elif name == "vgg19": 
+        model = vgg19_model(num_class)
     else: 
         raise ValueError(f'không có model: {name}')
         

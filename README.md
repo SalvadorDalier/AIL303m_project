@@ -35,20 +35,14 @@ AIL303m_project/
 
 ## Models
 
-### GoogLeNet (Inception v1)
+### Supported Architectures:
+- **GoogLeNet (Inception v1):** `src/model/googlenet22.py`
+- **DenseNet-121:** `src/model/densenet121.py`
+- **ResNet-50:** `src/model/resnet50.py`
+- **VGG-16:** `src/model/vgg16.py`
+- **VGG-19:** `src/model/vgg19.py`
 
-- **File:** `src/model/googlenet22.py`
-- Pretrained on ImageNet (`GoogLeNet_Weights.DEFAULT`)
-- Final fully-connected layer replaced for binary classification (`num_class=2`)
-- Auxiliary logits disabled
-- Input size: `(batch, 3, 224, 224)`
-
-### DenseNet-121
-
-- **File:** `src/model/densenet121.py`
-- Pretrained on ImageNet (`DenseNet121_Weights.DEFAULT`)
-- Classifier layer replaced for binary classification (`num_class=2`)
-- Input size: `(batch, 3, 224, 224)`
+All models are pretrained on ImageNet and have their final fully-connected layers adapted for binary classification (`num_class=2`). Expected input tensor size is `(batch, 3, 224, 224)`.
 
 ## Dataset
 
@@ -124,11 +118,25 @@ python train.py --model densenet121 --epoch 15 --batch 16 --verbose 2
 ```
 
 Arguments:
-- `--model`: Choose model (`googlenet22` or `densenet121`). Default is `googlenet22`.
-- `--epoch`: Number of training epochs. Default is `10`.
+- `--model`: Choose model (`googlenet22`, `densenet121`, `resnet50`, `vgg16`, `vgg19`). Default is `googlenet22`.
+- `--lr`: Learning rate for Adam optimizer. Default is `0.001` (Use `0.0001` for full fine-tuning).
+- `--epoch`: Maximum number of training epochs. Default is `10`.
+- `--stop`: Number of epochs for Early Stopping patience. Default is `30`.
 - `--batch`: Batch size. Default is `32`.
 - `--worker`: Number of worker threads for dataloader. Default is `2`.
 - `--verbose`: Display mode: `0` (silent), `1` (epoch summaries), `2` (detailed progress bar). Default is `2`.
+
+### Train on Cloud GPU (Serverless with Modal)
+
+For massive workloads (e.g., 2000 epochs) without a local GPU, train on cloud GPUs (NVIDIA A10G) using [Modal](https://modal.com). The script automatically syncs your data, trains remotely, and downloads the `.npy` weights and `.png` curves back locally!
+
+```bash
+# 1. Login to Modal (Only needed once)
+modal setup
+
+# 2. Start Cloud Training
+modal run src/train_modal.py --model resnet50 --epoch 2000 --lr 0.0001 --stop 30
+```
 
 ### Evaluate models
 
@@ -139,11 +147,11 @@ cd src
 python evaluate.py
 ```
 
-### Run benchmark / Grad-CAM
+### Run Explainable AI (Grad-CAM)
 
 ```powershell
 cd src
-python gradcam.py
+python explain.py --model vgg19 --img ../data/preprocessed/valid/healthy/0001_0001.jpg
 ```
 
 > **Note:** Scripts inside `src/` (`train.py`, `evaluate.py`, `gradcam.py`) use relative imports, so they must be run from the `src/` directory.

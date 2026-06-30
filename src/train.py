@@ -7,14 +7,19 @@ from tqdm import tqdm
 
 from model.googlenet22 import googlenet_model
 from model.densenet121 import densenet_model
+from model.resnet50 import resnet50_model
+from model.vgg16 import vgg16_model
+from model.vgg19 import vgg19_model
 from dataset import dataloader
 from utils import plot_curves
 
-# implement far more 3 models
+# implement far more models
 def get_model(name, num_class=2):
     if name == "googlenet22": return googlenet_model(num_class)
     if name == "densenet121": return densenet_model(num_class)
-
+    if name == "resnet50": return resnet50_model(num_class)
+    if name == "vgg16": return vgg16_model(num_class)
+    if name == "vgg19": return vgg19_model(num_class)
     else: raise ValueError(f'không có model: {name}')
 
 # setup run models 
@@ -30,9 +35,17 @@ def train_model(args):
     model = model.to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     history = {'train_acc': [], 'val_acc': [], 'train_loss': [], 'val_loss': []}
+
+    # --------------------------------------------------------
+    # Cấu hình Early Stopping
+    # --------------------------------------------------------
+    best_val_loss = float('inf')
+    stop = args.stop
+    stop_counter = 0
+    best_model_state = None
 
     for epoch in range(1, args.epoch + 1):
         if args.verbose == 2:
@@ -94,7 +107,31 @@ def train_model(args):
         
         if args.verbose in [1, 2]:
             print(f"Epoch {epoch}/{args.epoch} - Train Loss: {epoch_train_loss:.4f}, Train Acc: {epoch_train_acc:.2f}% | Val Loss: {epoch_val_loss:.4f}, Val Acc: {epoch_val_acc:.2f}%")
+            
+        # Kiểm tra Early Stopping
+        if epoch_val_loss < best_val_loss:
+            best_val_loss = epoch_val_loss
+            stop_counter = 0
+            import copy
+            best_model_state = copy.deepcopy(model.state_dict())
+            if args.verbose in [1, 2]:
+                print(f"[Best Model] Đã ghi nhận mô hình tốt nhất với Val Loss: {best_val_loss:.4f}")
+        else:
+            stop_counter += 1
+            if args.verbose in [1, 2]:
+                print(f"[Early Stopping] Số epoch liên tiếp không cải thiện: {stop_counter}/{stop}")
+                
+        if args.verbose in [1, 2]:
             print('-' * 60)
+            
+        if stop_counter >= stop:
+            print(f"\n[!] Dừng sớm kích hoạt! Validation loss không cải thiện sau {stop} epochs liên tục.")
+            print(f"[!] Dừng quá trình train tại Epoch {epoch}.")
+            break
+
+    # Phục hồi trọng số tốt nhất trước khi vẽ đồ thị và lưu file
+    if best_model_state is not None:
+        model.load_state_dict(best_model_state)
 
     plot_curves(history, model_name=args.model.upper())
 
@@ -108,8 +145,10 @@ def train_model(args):
     
     if args.model == "googlenet22":
         weight_filename = 'googlenet.npy'
-    else:
+    elif args.model == "densenet121":
         weight_filename = 'densenet.npy'
+    else:
+        weight_filename = f'{args.model}.npy'
         
     weight_path = weights_dir / weight_filename
     torch.save(model.state_dict(), weight_path)
@@ -125,8 +164,10 @@ def train_model(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Huấn luyện mô hình phân loại')
-    parser.add_argument('--model', type=str, default='googlenet22', choices=['googlenet22', 'densenet121'], help='Chọn mô hình để train')
+    parser.add_argument('--model', type=str, default='googlenet22', choices=['googlenet22', 'densenet121', 'resnet50', 'vgg16', 'vgg19'], help='Chọn mô hình để train')
+    parser.add_argument('--lr', type=float, default=0.001, help='Learning rate (mặc định: 0.001)')
     parser.add_argument('--epoch', type=int, default=10, help='Số lượng epoch')
+    parser.add_argument('--stop', type=int, default=30, help='Số epoch cho Early Stopping (mặc định: 30)')
     parser.add_argument('--worker', type=int, default=2, help='Số lượng worker cho dataloader')
     parser.add_argument('--batch', type=int, default=32, help='Batch size')
     parser.add_argument('--verbose', type=int, default=2, choices=[0, 1, 2], help='Chế độ hiển thị: 0 (im lặng), 1 (từng epoch), 2 (chi tiết với progress bar)')

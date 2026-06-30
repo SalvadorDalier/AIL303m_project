@@ -12,9 +12,16 @@ Tài liệu này lưu trữ lịch sử các lần chạy thử nghiệm huấn 
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | 2026-06-28 | GoogLeNet | 32 | 0.001 | 20 | Adam | 0.25 / 0.32 | 92.5% / 89.1% | Lần chạy đầu tiên, mô hình hội tụ tốt. |
 | 2 | 2026-06-28 | DenseNet-121 | 16 | 0.0001 | 30 | Adam | 0.18 / 0.24 | 95.2% / 91.8% | Kết quả tốt hơn GoogLeNet, nhưng huấn luyện lâu hơn. |
-| 3 | | | | | | | | | |
+| 3 | | | | | | | | |đã có add 1 module xóa cache khi chạy |
 
 ---
+#note
+thông tin bài báo:
+- Model pruning shows that a Conditional GAN-augmented classification network can retain 81.16% classification accuracy when compressed to 50% of its original size.
+- chỉ phân biệt được 'unhealthy synthetic fruit images with defects such as mould and gangrene.'
+- Conditional Generative Adversarial Networks ( CGAN ): just create the new synthetic data
+- train on 2000 epochs
+- we suggest a machine learning pipeline that combines the ideas of fine-tuning, transfer learning, and generative model-based training data 
 
 ## Chi tiết từng lần chạy (Detailed Run Logs)
 
@@ -52,6 +59,84 @@ Tài liệu này lưu trữ lịch sử các lần chạy thử nghiệm huấn 
 - **Ghi chú / Đánh giá:**
   - Độ chính xác cải thiện rõ rệt so với GoogLeNet.
   - Thời gian train mỗi epoch lâu hơn khoảng 1.5 lần.
+
+
+# File: C:\Users\Lenovo\Desktop\AIL303m_project\experiment_log_vgg16,19,resnet.md
+
+# Nhật ký Thử nghiệm Huấn luyện (Experiment Log)
+
+Tài liệu này lưu trữ lịch sử các lần chạy thử nghiệm huấn luyện mô hình, các tham số cấu hình, kết quả đạt được và các ghi chú quan trọng.
+
+## Bảng Tóm tắt Thử nghiệm (Experiment Summary Table)
+
+|STT|Ngày|Tên Mô hình|Batch Size|LR (Learning Rate)|Epochs|Optimizer|Loss (Train/Val)|Acc (Train/Val)|Ghi chú (Note)|
+|-|-|-|-|-|-|-|-|-|-|
+|1|2026-06-28|VGG16|36|0.001|5|Adam|0.26652 / 0.18486|92.8% / 93.2%|chạy lâu, độ chính xác cao nhất|
+|2|2026-06-28|VGG19|36|0.001|5|Adam|0.24 / 0.187|80.64% / 92.8%|lâu hơn, chính xác thấp hơn vgg16|
+|3|2026-06-29|Restnet50|36|0,001|5|Adam|0,40/0,40|82,13% / 83,1%|chạy nhanh hơn vgg16\&19, độ chính xác trên val thấp nhất|
+
+\---
+
+## Chi tiết từng lần chạy (Detailed Run Logs)
+
+### Thử nghiệm #1: VGG16
+
+* **Ngày:** 2026-06-28
+* **Tham số chi tiết:**
+
+  * Batch Size: 36
+  * Learning Rate: 0.001
+  * Epochs: 5
+  * Optimizer: Adam
+  * Loss Function: CrossEntropyLoss
+  * Image Size: 224x224
+* **Kết quả:**
+
+  * Train Loss: 0.26 | Val Loss: 0.18
+  * Train Acc: 92.8% | Val Acc: 93.2%
+* **Ghi chú / Đánh giá:**
+
+  * Mô hình chạy lâu, 1 batch mất gần 5 phút
+  * độ chính xác cao nhất (có thể do data đơn giản)
+
+### Thử nghiệm #2: VGG19
+
+* **Ngày:** 2026-06-28
+* **Tham số chi tiết:**
+
+  * Batch Size: 5
+  * Learning Rate: 0.001
+  * Epochs: 5
+  * Optimizer: Adam
+  * Loss Function: CrossEntropyLoss
+* **Kết quả:**
+
+  * Train Loss: 0.24 | Val Loss: 0.18
+  * Train Acc: 80.64% | Val Acc: 92.8%
+* **Ghi chú / Đánh giá:**
+
+  * Độ chính xác trên val không cải thiện nhiều, train acc thấp hơn so với vgg16 rất nhiều (có thể do epoch quá thấp)
+  * Thời gian chạy lâu hơn vgg19
+
+### Thử nghiệm #3: Restnet50
+
+* **Ngày:** 2026-06-29
+* **Tham số chi tiết:**
+
+  * Batch Size: 5
+  * Learning Rate: 0.001
+  * Epochs: 5
+  * Optimizer: Adam
+  * Loss Function: CrossEntropyLoss
+* **Kết quả:**
+
+  * Train Loss: 0.4 | Val Loss: 0.4
+  * Train Acc: 82.13% | Val Acc: 83.1%
+* **Ghi chú / Đánh giá:**
+
+  * Mô hình chạy nhanh hơn cả vgg16\&19
+  * Train và val acc lại thấp hơn cả 2 vgg (có thể do thiếu data, chạy ít epoch)
+
 
 
 # File: C:\Users\Lenovo\Desktop\AIL303m_project\README.md
@@ -93,20 +178,14 @@ AIL303m_project/
 
 ## Models
 
-### GoogLeNet (Inception v1)
+### Supported Architectures:
+- **GoogLeNet (Inception v1):** `src/model/googlenet22.py`
+- **DenseNet-121:** `src/model/densenet121.py`
+- **ResNet-50:** `src/model/resnet50.py`
+- **VGG-16:** `src/model/vgg16.py`
+- **VGG-19:** `src/model/vgg19.py`
 
-- **File:** `src/model/googlenet22.py`
-- Pretrained on ImageNet (`GoogLeNet_Weights.DEFAULT`)
-- Final fully-connected layer replaced for binary classification (`num_class=2`)
-- Auxiliary logits disabled
-- Input size: `(batch, 3, 224, 224)`
-
-### DenseNet-121
-
-- **File:** `src/model/densenet121.py`
-- Pretrained on ImageNet (`DenseNet121_Weights.DEFAULT`)
-- Classifier layer replaced for binary classification (`num_class=2`)
-- Input size: `(batch, 3, 224, 224)`
+All models are pretrained on ImageNet and have their final fully-connected layers adapted for binary classification (`num_class=2`). Expected input tensor size is `(batch, 3, 224, 224)`.
 
 ## Dataset
 
@@ -182,11 +261,25 @@ python train.py --model densenet121 --epoch 15 --batch 16 --verbose 2
 ```
 
 Arguments:
-- `--model`: Choose model (`googlenet22` or `densenet121`). Default is `googlenet22`.
-- `--epoch`: Number of training epochs. Default is `10`.
+- `--model`: Choose model (`googlenet22`, `densenet121`, `resnet50`, `vgg16`, `vgg19`). Default is `googlenet22`.
+- `--lr`: Learning rate for Adam optimizer. Default is `0.001` (Use `0.0001` for full fine-tuning).
+- `--epoch`: Maximum number of training epochs. Default is `10`.
+- `--stop`: Number of epochs for Early Stopping patience. Default is `30`.
 - `--batch`: Batch size. Default is `32`.
 - `--worker`: Number of worker threads for dataloader. Default is `2`.
 - `--verbose`: Display mode: `0` (silent), `1` (epoch summaries), `2` (detailed progress bar). Default is `2`.
+
+### Train on Cloud GPU (Serverless with Modal)
+
+For massive workloads (e.g., 2000 epochs) without a local GPU, train on cloud GPUs (NVIDIA A10G) using [Modal](https://modal.com). The script automatically syncs your data, trains remotely, and downloads the `.npy` weights and `.png` curves back locally!
+
+```bash
+# 1. Login to Modal (Only needed once)
+modal setup
+
+# 2. Start Cloud Training
+modal run src/train_modal.py --model resnet50 --epoch 2000 --lr 0.0001 --stop 30
+```
 
 ### Evaluate models
 
@@ -197,11 +290,11 @@ cd src
 python evaluate.py
 ```
 
-### Run benchmark / Grad-CAM
+### Run Explainable AI (Grad-CAM)
 
 ```powershell
 cd src
-python gradcam.py
+python explain.py --model vgg19 --img ../data/preprocessed/valid/healthy/0001_0001.jpg
 ```
 
 > **Note:** Scripts inside `src/` (`train.py`, `evaluate.py`, `gradcam.py`) use relative imports, so they must be run from the `src/` directory.
@@ -545,6 +638,9 @@ import gc
 
 from model.googlenet22 import googlenet_model
 from model.densenet121 import densenet_model
+from model.resnet50 import resnet50_model
+from model.vgg16 import vgg16_model
+from model.vgg19 import vgg19_model
 from dataset import dataloader
 from utils import compute_precision_recall, print_metrics
 
@@ -554,7 +650,10 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 def evaluate_all():
     models = [
         {"name": "googlenet22", "weight_path": str(PROJECT_ROOT / "weights" / "googlenet.npy")},
-        {"name": "densenet121", "weight_path": None}
+        {"name": "densenet121", "weight_path": str(PROJECT_ROOT / "weights" / "densenet.npy")},
+        {"name": "resnet50", "weight_path": str(PROJECT_ROOT / "weights" / "resnet50.npy")},
+        {"name": "vgg16", "weight_path": str(PROJECT_ROOT / "weights" / "vgg16.npy")},
+        {"name": "vgg19", "weight_path": str(PROJECT_ROOT / "weights" / "vgg19.npy")}
     ]
     
     for m in models:
@@ -565,6 +664,12 @@ def get_model(name, num_class=2, weight_path=None):
         model = googlenet_model(num_class)
     elif name == "densenet121": 
         model = densenet_model(num_class)
+    elif name == "resnet50": 
+        model = resnet50_model(num_class)
+    elif name == "vgg16": 
+        model = vgg16_model(num_class)
+    elif name == "vgg19": 
+        model = vgg19_model(num_class)
     else: 
         raise ValueError(f'không có model: {name}')
         
@@ -650,10 +755,14 @@ import argparse
 from pathlib import Path
 from torchvision import transforms
 
-# Đảm bảo import được các module từ src/
+#
+# c/
 sys.path.append(str(Path(__file__).resolve().parent))
 from model.googlenet22 import googlenet_model
 from model.densenet121 import densenet_model
+from model.resnet50 import resnet50_model
+from model.vgg16 import vgg16_model
+from model.vgg19 import vgg19_model
 
 
 class GradCAM:
@@ -765,8 +874,8 @@ def preprocess_image(image_path):
 def main():
     # Cấu hình đối số dòng lệnh
     parser = argparse.ArgumentParser(description="Chạy Explainable AI (Grad-CAM) giải thích mô hình phân loại trái cây.")
-    parser.add_argument('--model', type=str, default='googlenet22', choices=['googlenet22', 'densenet121'],
-                        help="Chọn mô hình để trực quan hóa (googlenet22 hoặc densenet121).")
+    parser.add_argument('--model', type=str, default='googlenet22', choices=['googlenet22', 'densenet121', 'resnet50', 'vgg16', 'vgg19'],
+                        help="Chọn mô hình để trực quan hóa (googlenet22, densenet121, resnet50, vgg16, vgg19).")
     parser.add_argument('--img', type=str, required=True,
                         help="Đường dẫn tới file ảnh cần giải thích.")
     parser.add_argument('--weights', type=str, default=None,
@@ -787,10 +896,22 @@ def main():
         model = googlenet_model(num_class=2)
         target_layer = model.inception5b
         default_weight_name = 'googlenet.npy'
-    else:
+    elif args.model == 'densenet121':
         model = densenet_model(num_class=2)
         target_layer = model.features.norm5
         default_weight_name = 'densenet.npy'
+    elif args.model == 'resnet50':
+        model = resnet50_model(num_class=2)
+        target_layer = model.layer4[-1]
+        default_weight_name = 'resnet50.npy'
+    elif args.model == 'vgg16':
+        model = vgg16_model(num_class=2)
+        target_layer = model.features[-1] # VGG16 features
+        default_weight_name = 'vgg16.npy'
+    elif args.model == 'vgg19':
+        model = vgg19_model(num_class=2)
+        target_layer = model.features[-1]
+        default_weight_name = 'vgg19.npy'
 
     # 2. Định vị và nạp weights (.npy hoặc .pth)
     weight_path = args.weights
@@ -976,14 +1097,19 @@ from tqdm import tqdm
 
 from model.googlenet22 import googlenet_model
 from model.densenet121 import densenet_model
+from model.resnet50 import resnet50_model
+from model.vgg16 import vgg16_model
+from model.vgg19 import vgg19_model
 from dataset import dataloader
 from utils import plot_curves
 
-# implement far more 3 models
+# implement far more models
 def get_model(name, num_class=2):
     if name == "googlenet22": return googlenet_model(num_class)
     if name == "densenet121": return densenet_model(num_class)
-
+    if name == "resnet50": return resnet50_model(num_class)
+    if name == "vgg16": return vgg16_model(num_class)
+    if name == "vgg19": return vgg19_model(num_class)
     else: raise ValueError(f'không có model: {name}')
 
 # setup run models 
@@ -999,9 +1125,17 @@ def train_model(args):
     model = model.to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     history = {'train_acc': [], 'val_acc': [], 'train_loss': [], 'val_loss': []}
+
+    # --------------------------------------------------------
+    # Cấu hình Early Stopping
+    # --------------------------------------------------------
+    best_val_loss = float('inf')
+    stop = args.stop
+    stop_counter = 0
+    best_model_state = None
 
     for epoch in range(1, args.epoch + 1):
         if args.verbose == 2:
@@ -1063,7 +1197,31 @@ def train_model(args):
         
         if args.verbose in [1, 2]:
             print(f"Epoch {epoch}/{args.epoch} - Train Loss: {epoch_train_loss:.4f}, Train Acc: {epoch_train_acc:.2f}% | Val Loss: {epoch_val_loss:.4f}, Val Acc: {epoch_val_acc:.2f}%")
+            
+        # Kiểm tra Early Stopping
+        if epoch_val_loss < best_val_loss:
+            best_val_loss = epoch_val_loss
+            stop_counter = 0
+            import copy
+            best_model_state = copy.deepcopy(model.state_dict())
+            if args.verbose in [1, 2]:
+                print(f"[Best Model] Đã ghi nhận mô hình tốt nhất với Val Loss: {best_val_loss:.4f}")
+        else:
+            stop_counter += 1
+            if args.verbose in [1, 2]:
+                print(f"[Early Stopping] Số epoch liên tiếp không cải thiện: {stop_counter}/{stop}")
+                
+        if args.verbose in [1, 2]:
             print('-' * 60)
+            
+        if stop_counter >= stop:
+            print(f"\n[!] Dừng sớm kích hoạt! Validation loss không cải thiện sau {stop} epochs liên tục.")
+            print(f"[!] Dừng quá trình train tại Epoch {epoch}.")
+            break
+
+    # Phục hồi trọng số tốt nhất trước khi vẽ đồ thị và lưu file
+    if best_model_state is not None:
+        model.load_state_dict(best_model_state)
 
     plot_curves(history, model_name=args.model.upper())
 
@@ -1077,8 +1235,10 @@ def train_model(args):
     
     if args.model == "googlenet22":
         weight_filename = 'googlenet.npy'
-    else:
+    elif args.model == "densenet121":
         weight_filename = 'densenet.npy'
+    else:
+        weight_filename = f'{args.model}.npy'
         
     weight_path = weights_dir / weight_filename
     torch.save(model.state_dict(), weight_path)
@@ -1094,14 +1254,141 @@ def train_model(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Huấn luyện mô hình phân loại')
-    parser.add_argument('--model', type=str, default='googlenet22', choices=['googlenet22', 'densenet121'], help='Chọn mô hình để train')
+    parser.add_argument('--model', type=str, default='googlenet22', choices=['googlenet22', 'densenet121', 'resnet50', 'vgg16', 'vgg19'], help='Chọn mô hình để train')
+    parser.add_argument('--lr', type=float, default=0.001, help='Learning rate (mặc định: 0.001)')
     parser.add_argument('--epoch', type=int, default=10, help='Số lượng epoch')
+    parser.add_argument('--stop', type=int, default=30, help='Số epoch cho Early Stopping (mặc định: 30)')
     parser.add_argument('--worker', type=int, default=2, help='Số lượng worker cho dataloader')
     parser.add_argument('--batch', type=int, default=32, help='Batch size')
     parser.add_argument('--verbose', type=int, default=2, choices=[0, 1, 2], help='Chế độ hiển thị: 0 (im lặng), 1 (từng epoch), 2 (chi tiết với progress bar)')
     
     args = parser.parse_args()
     train_model(args)
+
+
+# File: C:\Users\Lenovo\Desktop\AIL303m_project\src\train_modal.py
+
+import os
+import sys
+from pathlib import Path
+import modal
+
+# 1. Định nghĩa ứng dụng Modal
+app = modal.App("ail303m-fruit-classification")
+
+# 2. Định nghĩa Container Image (Môi trường chạy trên Cloud)
+# Cài đặt PyTorch hỗ trợ GPU, torchvision và các thư viện cần thiết
+image = (
+    modal.Image.debian_slim()
+    .pip_install(
+        "torch", 
+        "torchvision", 
+        "tqdm", 
+        "matplotlib",
+        "pillow"
+    )
+)
+
+# 3. Định vị thư mục dự án cục bộ để tải lên Cloud
+local_project_dir = Path(__file__).resolve().parent.parent
+
+# Cấu hình Mount để tải toàn bộ thư mục dự án lên Cloud, loại bỏ các thư mục rác/nặng
+project_mount = modal.Mount.from_local_dir(
+    local_path=str(local_project_dir),
+    remote_path="/root/project",
+    condition=lambda p: not any(x in p for x in [".venv", ".git", "__pycache__", "weights", "output"])
+)
+
+# 4. Hàm huấn luyện chạy trên GPU của Modal Cloud
+@app.function(
+    image=image,
+    mounts=[project_mount],
+    gpu="A10G",          # Sử dụng GPU NVIDIA A10G (24GB VRAM) hiệu năng cao
+    timeout=7200         # Giới hạn thời gian chạy tối đa là 2 tiếng (7200s)
+)
+def train_on_cloud(model_name: str, lr: float, epoch: int, batch: int, stop: int):
+    print("=" * 60)
+    print(f"[*] KHỞI ĐẦU HUẤN LUYỆN TRÊN MODAL CLOUD")
+    print(f"[*] Model: {model_name.upper()} | LR: {lr} | Epochs: {epoch} | Stop: {stop} | Batch Size: {batch}")
+    print("=" * 60)
+
+    # Chuyển môi trường làm việc vào thư mục src trên Cloud
+    os.chdir("/root/project/src")
+    sys.path.append("/root/project/src")
+
+    # Import các thành phần từ pipeline gốc của dự án
+    from train import train_model
+
+    # Tạo class giả lập Argument Parser để truyền vào train_model
+    class Args:
+        model = model_name
+        lr = lr
+        epoch = epoch
+        stop = stop
+        worker = 2
+        batch = batch
+        # Chọn verbose=1 để in kết quả gọn gàng sau mỗi epoch (tránh spam log ở console Cloud)
+        verbose = 1
+
+    # Thực thi quá trình train
+    train_model(Args())
+
+    # Đọc dữ liệu của file Trọng số (.npy) và Biểu đồ (.png) đã sinh ra trên Cloud
+    if model_name == "googlenet22":
+        weight_file = "googlenet.npy"
+        curve_file = "GOOGLENET22_Test_curves.png"
+    elif model_name == "densenet121":
+        weight_file = "densenet.npy"
+        curve_file = "DENSENET121_Test_curves.png"
+    else:
+        weight_file = f"{model_name}.npy"
+        curve_file = f"{model_name.upper()}_Test_curves.png"
+
+    cloud_weights_path = Path(f"/root/project/weights/{weight_file}")
+    cloud_curve_path = Path(f"/root/project/output/{curve_file}")
+
+    # Đọc file nhị phân để trả về máy khách (local)
+    weights_bytes = cloud_weights_path.read_bytes() if cloud_weights_path.exists() else None
+    curve_bytes = cloud_curve_path.read_bytes() if cloud_curve_path.exists() else None
+
+    print("[+] Quá trình huấn luyện trên Cloud hoàn tất!")
+    return weights_bytes, curve_bytes, weight_file, curve_file
+
+
+# 5. Điểm chạy chính ở máy cục bộ (Local Client Entrypoint)
+@app.local_entrypoint()
+def main(model: str = "googlenet22", lr: float = 0.001, epoch: int = 2000, batch: int = 32, stop: int = 30):
+    """
+    Chạy lệnh: modal run src/train_modal.py --model googlenet22 --epoch 2000 --stop 30
+    """
+    # Gửi lệnh lên Cloud chạy và đợi kết quả trả về
+    weights_bytes, curve_bytes, weight_file, curve_file = train_on_cloud.remote(
+        model_name=model, 
+        lr=lr, 
+        epoch=epoch, 
+        batch=batch,
+        stop=stop
+    )
+
+    # Nhận và lưu lại file Trọng số về máy local
+    if weights_bytes:
+        local_weights_dir = local_project_dir / "weights"
+        local_weights_dir.mkdir(exist_ok=True)
+        local_weights_path = local_weights_dir / weight_file
+        local_weights_path.write_bytes(weights_bytes)
+        print(f"[+] Đã tải trọng số từ Cloud về máy cục bộ:\n    -> {local_weights_path}")
+    else:
+        print("[-] Không tìm thấy file trọng số được sinh ra trên Cloud.")
+
+    # Nhận và lưu lại file Biểu đồ về máy local
+    if curve_bytes:
+        local_output_dir = local_project_dir / "output"
+        local_output_dir.mkdir(exist_ok=True)
+        local_curve_path = local_output_dir / curve_file
+        local_curve_path.write_bytes(curve_bytes)
+        print(f"[+] Đã tải biểu đồ từ Cloud về máy cục bộ:\n    -> {local_curve_path}")
+    else:
+        print("[-] Không tìm thấy file biểu đồ được sinh ra trên Cloud.")
 
 
 # File: C:\Users\Lenovo\Desktop\AIL303m_project\src\utils.py
@@ -1281,6 +1568,10 @@ def densenet_model(num_class):
     weight = models.DenseNet121_Weights.DEFAULT # mặc định thấy trọng số tốt nhất
     model = models.densenet121(weights=weight)
 
+    # Đóng băng các lớp convolution (Feature Extraction)
+    for param in model.parameters():
+        param.requires_grad = False
+
     ori_feature = model.classifier.in_features
     model.classifier = nn.Linear(in_features=ori_feature, out_features=num_class)
     return model
@@ -1310,6 +1601,11 @@ def googlenet_model(num_class=2):
     model = models.googlenet(weight)
     
     model.aux_logits = False
+    
+    # Đóng băng các lớp convolution (Feature Extraction)
+    for param in model.parameters():
+        param.requires_grad = False
+
     ori_feature = model.fc.in_features
     model.fc = nn.Linear(in_features=ori_feature, out_features=num_class)
     return model 
@@ -1327,6 +1623,380 @@ if __name__ == "__main__":
         col_width=25,
         row_settings=['var_names']
     )
+
+# File: C:\Users\Lenovo\Desktop\AIL303m_project\src\model\resnet50.py
+
+import os
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torchvision import datasets, transforms, models
+from torch.utils.data import DataLoader
+
+
+def resnet50_model(num_class=2):
+    """
+    Khởi tạo mô hình ResNet-50 cho pipeline dự án.
+    Giữ nguyên logic của partner (freeze feature maps).
+    """
+    model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+
+    # Freeze feature maps to preserve pre-trained patterns
+    for param in model.parameters():
+        param.requires_grad = False
+
+    # Swap the final Fully Connected (.fc) layer to output your classes
+    in_features = model.fc.in_features
+    model.fc = nn.Linear(in_features, num_class)
+    return model
+
+
+def main():
+    """
+    Pipeline huấn luyện gốc của partner.
+    """
+    IMG_SIZE = (224, 224)
+    BATCH_SIZE = 36
+    EPOCHS = 5
+    LEARNING_RATE = 0.001  
+
+    train_dir = r"C:\Users\Mai Thanh Binh\OneDrive\Desktop\AIL303\AIL303m_project\lemon_dataset\train"
+    val_dir = r"C:\Users\Mai Thanh Binh\OneDrive\Desktop\AIL303\AIL303m_project\lemon_dataset\valid"
+
+    data_transforms = transforms.Compose([
+        transforms.Resize(IMG_SIZE),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
+    print("Loading datasets...")
+    train_dataset = datasets.ImageFolder(root=train_dir, transform=data_transforms)
+    val_dataset = datasets.ImageFolder(root=val_dir, transform=data_transforms)
+    
+    num_classes = len(train_dataset.classes)
+    print(f"Detected Classes: {train_dataset.classes}")
+    print(f"Training samples: {len(train_dataset)} | Validation samples: {len(val_dataset)}")
+
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
+
+    print("Loading Pre-trained ResNet-50 Architecture...")
+    model = resnet50_model(num_class=num_classes)
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.fc.parameters(), lr=LEARNING_RATE)
+
+    # --- Training Loop ---
+    print("\nStarting Training Sequence...")
+    for epoch in range(EPOCHS):
+        # --- Train Phase ---
+        model.train()
+        running_loss = 0.0
+        correct_train = 0
+        total_train = 0
+        
+        for images, labels in train_loader:
+            images, labels = images.to(device), labels.to(device)
+            
+            optimizer.zero_grad()
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            
+            running_loss += loss.item() * images.size(0)
+            _, predicted = outputs.max(1)
+            total_train += labels.size(0)
+            correct_train += predicted.eq(labels).sum().item()
+            
+        epoch_train_loss = running_loss / len(train_loader.dataset)
+        epoch_train_acc = (correct_train / total_train) * 100
+
+        # --- Validation Phase ---
+        model.eval()
+        val_loss = 0.0
+        correct_val = 0
+        total_val = 0
+        
+        with torch.no_grad():
+            for images, labels in val_loader:
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+                
+                val_loss += loss.item() * images.size(0)
+                _, predicted = outputs.max(1)
+                total_val += labels.size(0)
+                correct_val += predicted.eq(labels).sum().item()
+                
+        epoch_val_loss = val_loss / len(val_loader.dataset)
+        epoch_val_acc = (correct_val / total_val) * 100
+
+        print(f"Epoch [{epoch+1:02d}/{EPOCHS:02d}] | "
+              f"Train Loss: {epoch_train_loss:.4f} - Train Acc: {epoch_train_acc:.2f}% | "
+              f"Val Loss: {epoch_val_loss:.4f} - Val Acc: {epoch_val_acc:.2f}%")
+
+    print("\nTraining complete! Saving checkpoint to 'resnet50_lemon_model.pth'...")
+    torch.save(model.state_dict(), "resnet50_lemon_model.pth")
+
+if __name__ == "__main__":
+    main()
+
+# File: C:\Users\Lenovo\Desktop\AIL303m_project\src\model\vgg16.py
+
+import os
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torchvision import datasets, transforms, models
+from torch.utils.data import DataLoader
+
+
+def vgg16_model(num_class=2):
+    """
+    Khởi tạo mô hình VGG16 cho pipeline dự án.
+    Giữ nguyên logic của partner (freeze features, thêm Dropout).
+    """
+    vgg_weights = models.VGG16_Weights.DEFAULT
+    model = models.vgg16(weights=vgg_weights)
+
+    # Freeze the convolutional base parameters
+    for param in model.features.parameters():
+        param.requires_grad = False
+
+    num_features = model.classifier[0].in_features 
+    model.classifier = nn.Sequential(
+        nn.Linear(num_features, 512),
+        nn.ReLU(),
+        nn.Dropout(0.5),
+        nn.Linear(512, num_class) 
+    )
+    return model
+
+
+def main():
+    """
+    Pipeline huấn luyện gốc của partner.
+    """
+    IMG_SIZE = (224, 224)
+    BATCH_SIZE = 36
+    EPOCHS = 5
+    LEARNING_RATE = 0.001
+
+    train_dir = r"C:\Users\Mai Thanh Binh\OneDrive\Desktop\AIL303\AIL303m_project\lemon_dataset\train"
+    val_dir = r"C:\Users\Mai Thanh Binh\OneDrive\Desktop\AIL303\AIL303m_project\lemon_dataset\valid"
+
+    data_transforms = transforms.Compose([
+        transforms.Resize(IMG_SIZE),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+
+    train_dataset = datasets.ImageFolder(root=train_dir, transform=data_transforms)
+    val_dataset = datasets.ImageFolder(root=val_dir, transform=data_transforms)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
+
+    print(f"Loaded {len(train_dataset)} training images and {len(val_dataset)} validation images.")
+
+    num_classes = len(train_dataset.classes)
+    model = vgg16_model(num_class=num_classes)
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss() 
+    optimizer = optim.Adam(model.classifier.parameters(), lr=LEARNING_RATE) 
+
+    # ---Training Loop ---
+    print("\nStarting Training...")
+    for epoch in range(EPOCHS):
+        model.train()
+        running_loss = 0.0
+        correct_train = 0
+        total_train = 0
+        
+        for inputs, labels in train_loader:
+            inputs, labels = inputs.to(device), labels.to(device).long()
+            
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            
+            running_loss += loss.item() * inputs.size(0)
+            
+            _, predictions = outputs.max(1)
+            correct_train += (predictions == labels).sum().item()
+            total_train += labels.size(0)
+            
+        epoch_loss = running_loss / len(train_loader.dataset)
+        epoch_acc = correct_train / total_train
+        
+        # Validation Phase
+        model.eval()
+        val_loss = 0.0
+        correct_val = 0
+        total_val = 0
+        
+        with torch.no_grad():
+            for inputs, labels in val_loader:
+                inputs, labels = inputs.to(device), labels.to(device).long()
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+                
+                val_loss += loss.item() * inputs.size(0)
+                
+                _, predictions = outputs.max(1)
+                correct_val += (predictions == labels).sum().item()
+                total_val += labels.size(0)
+        
+        epoch_val_loss = val_loss / len(val_loader.dataset)
+        epoch_val_acc = correct_val / total_val
+        
+        print(f"Epoch {epoch+1}/{EPOCHS} -> "
+              f"Train Loss: {epoch_loss:.4f} | Train Acc: {epoch_acc:.4f} |"
+              f"Val Loss: {epoch_val_loss:.4f} | Val Acc: {epoch_val_acc:.4f}")
+
+    # ---Save Model Weights ---
+    torch.save(model.state_dict(), 'custom_vgg16_model.pth')
+    print("\nTraining complete! Weights saved successfully as 'custom_vgg16_model.pth'")
+
+if __name__ == "__main__":
+    main()
+
+# File: C:\Users\Lenovo\Desktop\AIL303m_project\src\model\vgg19.py
+
+import os
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torchvision import datasets, transforms, models
+from torch.utils.data import DataLoader
+
+
+def vgg19_model(num_class=2):
+    """
+    Khởi tạo mô hình VGG19 cho pipeline dự án.
+    Giữ nguyên logic của partner (freeze features, thêm Dropout).
+    """
+    vgg_weights = models.VGG19_Weights.DEFAULT
+    model = models.vgg19(weights=vgg_weights)
+
+    # Freeze the convolutional base parameters of VGG19
+    for param in model.features.parameters():
+        param.requires_grad = False
+
+    num_features = model.classifier[0].in_features 
+    model.classifier = nn.Sequential(
+        nn.Linear(num_features, 512),
+        nn.ReLU(),
+        nn.Dropout(0.5),
+        nn.Linear(512, num_class) 
+    )
+    return model
+
+
+def main():
+    """
+    Pipeline huấn luyện gốc của partner.
+    """
+    IMG_SIZE = (224, 224)
+    BATCH_SIZE = 36
+    EPOCHS = 5
+    LEARNING_RATE = 0.001
+
+    train_dir = r"C:\Users\Mai Thanh Binh\OneDrive\Desktop\AIL303\AIL303m_project\lemon_dataset\train"
+    val_dir = r"C:\Users\Mai Thanh Binh\OneDrive\Desktop\AIL303\AIL303m_project\lemon_dataset\valid"
+
+    data_transforms = transforms.Compose([
+        transforms.Resize(IMG_SIZE),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+
+    train_dataset = datasets.ImageFolder(root=train_dir, transform=data_transforms)
+    val_dataset = datasets.ImageFolder(root=val_dir, transform=data_transforms)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
+
+    print(f"Loaded {len(train_dataset)} training images and {len(val_dataset)} validation images.")
+
+    num_classes = len(train_dataset.classes)
+    model = vgg19_model(num_class=num_classes)
+    model = model.to(device)
+
+    criterion = nn.CrossEntropyLoss() 
+    optimizer = optim.Adam(model.classifier.parameters(), lr=LEARNING_RATE) 
+
+    print("\nStarting VGG19 Training...")
+    for epoch in range(EPOCHS):
+        # --- Training Phase ---
+        model.train()
+        running_loss = 0.0
+        correct_train = 0
+        total_train = 0
+        
+        for inputs, labels in train_loader:
+            inputs, labels = inputs.to(device), labels.to(device).long()
+            
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            
+            running_loss += loss.item() * inputs.size(0)
+            
+            _, predictions = outputs.max(1)
+            correct_train += (predictions == labels).sum().item()
+            total_train += labels.size(0)
+            
+        epoch_loss = running_loss / len(train_loader.dataset)
+        epoch_acc = correct_train / total_train
+        
+        # --- Validation Phase ---
+        model.eval()
+        val_loss = 0.0
+        correct_val = 0
+        total_val = 0
+        
+        with torch.no_grad():
+            for inputs, labels in val_loader:
+                inputs, labels = inputs.to(device), labels.to(device).long()
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+                
+                val_loss += loss.item() * inputs.size(0)
+                
+                _, predictions = outputs.max(1)
+                correct_val += (predictions == labels).sum().item()
+                total_val += labels.size(0)
+                
+        epoch_val_loss = val_loss / len(val_loader.dataset)
+        epoch_val_acc = correct_val / total_val
+        
+        print(f"Epoch {epoch+1:02d}/{EPOCHS:02d} -> "
+              f"Train Loss: {epoch_loss:.4f} | Train Acc: {epoch_acc * 100:.2f}% | "
+              f"Val Loss: {epoch_val_loss:.4f} | Val Acc: {epoch_val_acc * 100:.2f}%")
+
+    # Save updated weights
+    torch.save(model.state_dict(), 'custom_vgg19_model.pth')
+    print("\nTraining complete! Weights saved successfully as 'custom_vgg19_model.pth'")
+
+if __name__ == "__main__":
+    main()
 
 # File: C:\Users\Lenovo\Desktop\AIL303m_project\src\module_going\env_setup.py
 

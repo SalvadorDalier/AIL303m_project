@@ -9,9 +9,21 @@ Tài liệu này lưu trữ lịch sử các lần chạy thử nghiệm huấn 
 | 1 | 2026-06-28 | GoogLeNet | 32 | 0.001 | 20 | Adam | 0.25 / 0.32 | 92.5% / 89.1% | Lần chạy đầu tiên, mô hình hội tụ tốt. |
 | 2 | 2026-06-28 | DenseNet-121 | 16 | 0.0001 | 30 | Adam | 0.18 / 0.24 | 95.2% / 91.8% | Kết quả tốt hơn GoogLeNet, nhưng huấn luyện lâu hơn. |
 | 3 | | | | | | | | |đã có add 1 module xóa cache khi chạy |
-
+2026-06-30 đã dùng model của bài báo train thêm 690 bức ảnh cho bằng với input của bài báo -> dataset tổng: 2152 train 538 valid
 ---
+#note
+thông tin bài báo:
+- Model pruning shows that a Conditional GAN-augmented classification network can retain 81.16% classification accuracy when compressed to 50% of its original size.
+- chỉ phân biệt được 'unhealthy synthetic fruit images with defects such as mould and gangrene.'
+- Conditional Generative Adversarial Networks ( CGAN ): just create the new synthetic data
+- train on 2000 epochs
+- we suggest a machine learning pipeline that combines the ideas of fine-tuning, transfer learning, and generative model-based training data 
 
+
+audit log: 
+prompt: trước đó thì hyperparameter đã ok chưa, nếu chưa thì tôi cho lên train cx vô dụng vì sẽ phí credit, nên có cách nào
+khác để check không?
+AI respond: 
 ## Chi tiết từng lần chạy (Detailed Run Logs)
 
 ### Thử nghiệm #1: GoogLeNet Baseline

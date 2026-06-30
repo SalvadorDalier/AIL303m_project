@@ -21,6 +21,9 @@ from torchvision import transforms
 sys.path.append(str(Path(__file__).resolve().parent))
 from model.googlenet22 import googlenet_model
 from model.densenet121 import densenet_model
+from model.resnet50 import resnet50_model
+from model.vgg16 import vgg16_model
+from model.vgg19 import vgg19_model
 
 
 class GradCAM:
@@ -132,8 +135,8 @@ def preprocess_image(image_path):
 def main():
     # Cấu hình đối số dòng lệnh
     parser = argparse.ArgumentParser(description="Chạy Explainable AI (Grad-CAM) giải thích mô hình phân loại trái cây.")
-    parser.add_argument('--model', type=str, default='googlenet22', choices=['googlenet22', 'densenet121'],
-                        help="Chọn mô hình để trực quan hóa (googlenet22 hoặc densenet121).")
+    parser.add_argument('--model', type=str, default='googlenet22', choices=['googlenet22', 'densenet121', 'resnet50', 'vgg16', 'vgg19'],
+                        help="Chọn mô hình để trực quan hóa (googlenet22, densenet121, resnet50, vgg16, vgg19).")
     parser.add_argument('--img', type=str, required=True,
                         help="Đường dẫn tới file ảnh cần giải thích.")
     parser.add_argument('--weights', type=str, default=None,
@@ -154,10 +157,22 @@ def main():
         model = googlenet_model(num_class=2)
         target_layer = model.inception5b
         default_weight_name = 'googlenet.npy'
-    else:
+    elif args.model == 'densenet121':
         model = densenet_model(num_class=2)
         target_layer = model.features.norm5
         default_weight_name = 'densenet.npy'
+    elif args.model == 'resnet50':
+        model = resnet50_model(num_class=2)
+        target_layer = model.layer4[-1]
+        default_weight_name = 'resnet50.npy'
+    elif args.model == 'vgg16':
+        model = vgg16_model(num_class=2)
+        target_layer = model.features[-1] # VGG16 features
+        default_weight_name = 'vgg16.npy'
+    elif args.model == 'vgg19':
+        model = vgg19_model(num_class=2)
+        target_layer = model.features[-1]
+        default_weight_name = 'vgg19.npy'
 
     # 2. Định vị và nạp weights (.npy hoặc .pth)
     weight_path = args.weights
