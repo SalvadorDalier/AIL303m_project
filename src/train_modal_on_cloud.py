@@ -15,7 +15,8 @@ image = (
         "torchvision", 
         "tqdm", 
         "matplotlib",
-        "pillow"
+        "pillow",
+        "torchinfo"
     )
 )
 
@@ -47,20 +48,21 @@ def train_on_cloud(model_name: str, lr: float, epoch: int, batch: int, stop: int
 
     # Import các thành phần từ pipeline gốc của dự án
     from train import train_model
+    import argparse
 
     # Tạo class giả lập Argument Parser để truyền vào train_model
-    class Args:
-        model = model_name
-        lr = lr
-        epoch = epoch
-        stop = stop
-        worker = 2
-        batch = batch
-        # Chọn verbose=1 để in kết quả gọn gàng sau mỗi epoch (tránh spam log ở console Cloud)
-        verbose = 1
+    args = argparse.Namespace(
+        model=model_name,
+        lr=lr,
+        epoch=epoch,
+        stop=stop,
+        worker=2,
+        batch=batch,
+        verbose=1 # In kết quả gọn gàng sau mỗi epoch
+    )
 
     # Thực thi quá trình train
-    train_model(Args())
+    train_model(args)
 
     # Đọc dữ liệu của file Trọng số (.npy) và Biểu đồ (.png) đã sinh ra trên Cloud
     if model_name == "googlenet22":
