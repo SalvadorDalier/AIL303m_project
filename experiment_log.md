@@ -8,7 +8,7 @@ Tài liệu này lưu trữ lịch sử các lần chạy thử nghiệm huấn 
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | 2026-06-28 | GoogLeNet | 32 | 0.001 | 20 | Adam | 0.25 / 0.32 | 92.5% / 89.1% | Lần chạy đầu tiên, mô hình hội tụ tốt. |
 | 2 | 2026-06-28 | DenseNet-121 | 16 | 0.0001 | 30 | Adam | 0.18 / 0.24 | 95.2% / 91.8% | Kết quả tốt hơn GoogLeNet, nhưng huấn luyện lâu hơn. |
-| 3 | | | | | | | | | |
+| 3 | | | | | | | | |đã có add 1 module xóa cache khi chạy |
 
 ---
 
