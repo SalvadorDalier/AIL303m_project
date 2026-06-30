@@ -34,7 +34,7 @@ image = image.add_local_dir(
 @app.function(
     image=image,
     gpu="A10G",          # Sử dụng GPU NVIDIA A10G (24GB VRAM) hiệu năng cao
-    timeout=7200         # Giới hạn thời gian chạy tối đa là 2 tiếng (7200s)
+    timeout=21600        # Tăng giới hạn thời gian lên 6 tiếng (21600s) để chạy đủ 1000 epochs
 )
 def train_on_cloud(model_name: str, lr: float, epoch: int, batch: int, stop: int):
     print("=" * 60)

@@ -10,7 +10,7 @@ Tài liệu này lưu trữ lịch sử các lần chạy thử nghiệm huấn 
 | 2 | 2026-06-28 | DenseNet-121 | 16 | 0.0001 | 30 | Adam | 0.18 / 0.24 | 95.2% / 91.8% | Kết quả tốt hơn GoogLeNet, nhưng huấn luyện lâu hơn. |
 | 3 | | | | | | | | |đã có add 1 module xóa cache khi chạy |
 2026-06-30 đã dùng model của bài báo train thêm 690 bức ảnh cho bằng với input của bài báo -> dataset tổng: 2152 train 538 valid
-2026-06-30 dùng modal platform để train AI trên cloud
+2026-06-30 dùng modal platform để train AI trên cloud - thời gian dự kiến chạy cho 1000 epochs là khoảng 4 tiếng
 ---
 #note
 thông tin bài báo:
