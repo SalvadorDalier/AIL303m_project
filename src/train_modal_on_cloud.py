@@ -22,17 +22,16 @@ image = (
 # 3. Định vị thư mục dự án cục bộ để tải lên Cloud
 local_project_dir = Path(__file__).resolve().parent.parent
 
-# Cấu hình Mount để tải toàn bộ thư mục dự án lên Cloud, loại bỏ các thư mục rác/nặng
-project_mount = modal.Mount.from_local_dir(
-    local_path=str(local_project_dir),
+# Cấu hình tải toàn bộ thư mục dự án lên Cloud, loại bỏ các thư mục rác/nặng
+image = image.add_local_dir(
+    local_path=local_project_dir,
     remote_path="/root/project",
-    condition=lambda p: not any(x in p for x in [".venv", ".git", "__pycache__", "weights", "output"])
+    ignore=["**/.venv", "**/.git", "**/__pycache__", "**/weights", "**/output"]
 )
 
 # 4. Hàm huấn luyện chạy trên GPU của Modal Cloud
 @app.function(
     image=image,
-    mounts=[project_mount],
     gpu="A10G",          # Sử dụng GPU NVIDIA A10G (24GB VRAM) hiệu năng cao
     timeout=7200         # Giới hạn thời gian chạy tối đa là 2 tiếng (7200s)
 )
