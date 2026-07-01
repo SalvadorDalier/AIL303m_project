@@ -50,88 +50,91 @@ def train_model(args):
     for epoch in range(1, args.epoch + 1):
         if args.verbose == 2:
             print(f"Epoch {epoch}/{args.epoch}")
+    # Vòng lặp huấn luyện chính
+    try:
+        for epoch in range(args.epoch):
+            print(f"\n[+] Epoch {epoch+1}/{args.epoch}")
             
-        model.train()
-        running_loss = 0.0
-        correct_train = 0
-        total_train = 0
-        
-        train_iterator = tqdm(train_loader, desc=f"Epoch {epoch}/{args.epoch} [Train]") if args.verbose == 2 else train_loader
-        
-        for inputs, labels in train_iterator:
-            inputs, labels = inputs.to(device), labels.to(device)
+            # --- TRAIN ---
+            model.train()
+            train_loss = 0.0
+            correct_train = 0
+            total_train = 0
             
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-            
-            running_loss += loss.item() * inputs.size(0)
-            _, predicted = torch.max(outputs.data, 1)
-            total_train += labels.size(0)
-            correct_train += (predicted == labels).sum().item()
-            
-            if args.verbose == 2:
-                train_iterator.set_postfix(loss=loss.item(), acc=100.*correct_train/total_train)
+            for inputs, targets in train_loader:
+                inputs, targets = inputs.to(device), targets.to(device)
                 
-        epoch_train_loss = running_loss / len(train_loader.dataset)
-        epoch_train_acc = 100. * correct_train / total_train
-        
-        model.eval()
-        val_loss = 0.0
-        correct_val = 0
-        total_val = 0
-        
-        val_iterator = tqdm(valid_loader, desc=f"Epoch {epoch}/{args.epoch} [Valid]") if args.verbose == 2 else valid_loader
-        
-        with torch.no_grad():
-            for inputs, labels in val_iterator:
-                inputs, labels = inputs.to(device), labels.to(device)
-                
+                optimizer.zero_grad()
                 outputs = model(inputs)
-                loss = criterion(outputs, labels)
                 
-                val_loss += loss.item() * inputs.size(0)
-                _, predicted = torch.max(outputs.data, 1)
-                total_val += labels.size(0)
-                correct_val += (predicted == labels).sum().item()
+                # Tính Loss chung cho mọi model
+                loss = criterion(outputs, targets)
+                preds = torch.argmax(outputs, dim=1)
+                    
+                loss.backward()
+                optimizer.step()
                 
-        epoch_val_loss = val_loss / len(valid_loader.dataset)
-        epoch_val_acc = 100. * correct_val / total_val
-        
-        history['train_acc'].append(epoch_train_acc)
-        history['val_acc'].append(epoch_val_acc)
-        history['train_loss'].append(epoch_train_loss)
-        history['val_loss'].append(epoch_val_loss)
-        
-        if args.verbose in [1, 2]:
-            print(f"Epoch {epoch}/{args.epoch} - Train Loss: {epoch_train_loss:.4f}, Train Acc: {epoch_train_acc:.2f}% | Val Loss: {epoch_val_loss:.4f}, Val Acc: {epoch_val_acc:.2f}%")
+                train_loss += loss.item() * inputs.size(0)
+                correct_train += (preds == targets).sum().item()
+                total_train += targets.size(0)
+                
+            epoch_train_loss = train_loss / total_train
+            epoch_train_acc = correct_train / total_train
             
-        # Kiểm tra Early Stopping
-        if epoch_val_loss < best_val_loss:
-            best_val_loss = epoch_val_loss
-            stop_counter = 0
-            import copy
-            best_model_state = copy.deepcopy(model.state_dict())
-            if args.verbose in [1, 2]:
-                print(f"[Best Model] Đã ghi nhận mô hình tốt nhất với Val Loss: {best_val_loss:.4f}")
-        else:
-            stop_counter += 1
-            if args.verbose in [1, 2]:
-                print(f"[Early Stopping] Số epoch liên tiếp không cải thiện: {stop_counter}/{stop}")
-                
-        if args.verbose in [1, 2]:
-            print('-' * 60)
+            # --- VALIDATION ---
+            model.eval()
+            val_loss = 0.0
+            correct_val = 0
+            total_val = 0
             
-        if stop_counter >= stop:
-            print(f"\n[!] Dừng sớm kích hoạt! Validation loss không cải thiện sau {stop} epochs liên tục.")
-            print(f"[!] Dừng quá trình train tại Epoch {epoch}.")
-            break
+            with torch.no_grad():
+                for inputs, targets in valid_loader:
+                    inputs, targets = inputs.to(device), targets.to(device)
+                    outputs = model(inputs)
+                    
+                    loss = criterion(outputs, targets)
+                    preds = torch.argmax(outputs, dim=1)
+                        
+                    val_loss += loss.item() * inputs.size(0)
+                    correct_val += (preds == targets).sum().item()
+                    total_val += targets.size(0)
+                    
+            epoch_val_loss = val_loss / total_val
+            epoch_val_acc = correct_val / total_val
+            
+            # Lưu lịch sử
+            history['train_loss'].append(epoch_train_loss)
+            history['train_acc'].append(epoch_train_acc)
+            history['val_loss'].append(epoch_val_loss)
+            history['val_acc'].append(epoch_val_acc)
+            
+            if args.verbose > 0:
+                print(f"Train Loss: {epoch_train_loss:.4f} - Train Acc: {epoch_train_acc:.4f}")
+                print(f"Val Loss:   {epoch_val_loss:.4f} - Val Acc:   {epoch_val_acc:.4f}")
 
-    # Phục hồi trọng số tốt nhất trước khi vẽ đồ thị và lưu file
+            # Kiểm tra Early Stopping
+            if epoch_val_loss < best_val_loss:
+                best_val_loss = epoch_val_loss
+                stop_counter = 0
+                best_model_state = model.state_dict().copy()
+                if args.verbose > 0:
+                    print(f"[*] Val Loss giảm. Đã lưu phiên bản tốt nhất (Best Loss: {best_val_loss:.4f})")
+            else:
+                stop_counter += 1
+                if args.verbose > 0:
+                    print(f"[-] Val Loss không cải thiện ({stop_counter}/{stop})")
+                    
+                if stop_counter >= stop:
+                    print(f"[*] Đã kích hoạt Early Stopping tại Epoch {epoch+1}!")
+                    break
+
+    except KeyboardInterrupt:
+        print("\n[!] NHẬN ĐƯỢC LỆNH NGẮT (Ctrl+C). Đang tiến hành lưu lại phiên bản tốt nhất trước khi thoát...")
+
+    # Trả lại trọng số tốt nhất cho model
     if best_model_state is not None:
         model.load_state_dict(best_model_state)
+        print("[+] Đã phục hồi trọng số có Validation Loss thấp nhất.")
 
     plot_curves(history, model_name=args.model.upper())
 
