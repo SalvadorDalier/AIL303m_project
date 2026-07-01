@@ -136,8 +136,8 @@ def plot_curves(history, model_name="model", save_dir=SAVE_DIR):
     if save_dir:
         from pathlib import Path
         Path(save_dir).mkdir(parents=True, exist_ok=True)
-        filepath = f"{save_dir}\\{model_name}_curves.png"
-        plt.savefig(filepath, dpi=DPI, bbox_inches='tight')
+        filepath = Path(save_dir) / f"{model_name}_curves.png"
+        plt.savefig(str(filepath), dpi=DPI, bbox_inches='tight')
         print(f"Da luu bieu do tai: {filepath}")
 
     plt.show()
