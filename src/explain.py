@@ -159,7 +159,8 @@ def main():
         default_weight_name = 'googlenet.npy'
     elif args.model == 'densenet121':
         model = densenet_model(num_class=2)
-        target_layer = model.features.norm5
+        # Sửa lỗi Inplace ReLU: Đổi từ norm5 sang denseblock4
+        target_layer = model.features.denseblock4
         default_weight_name = 'densenet.npy'
     elif args.model == 'resnet50':
         model = resnet50_model(num_class=2)
