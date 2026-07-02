@@ -191,6 +191,11 @@ def main():
     model = model.to(device)
     model.eval()
 
+    # BẮT BUỘC: Bật lại tính toán Gradient cho tất cả các lớp
+    # (Vì trong file định nghĩa model đã bị đóng băng bằng requires_grad = False)
+    for param in model.parameters():
+        param.requires_grad = True
+
     # 3. Tiền xử lý ảnh đầu vào
     img_resized, input_tensor = preprocess_image(args.img)
     input_tensor = input_tensor.to(device)
