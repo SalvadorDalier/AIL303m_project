@@ -49,7 +49,9 @@ def compute_precision_recall(model, dataloader, device=DEVICE, num_class=NUM_CLA
             labels = labels.to(device)
 
             outputs = model(inputs)
-            _, preds = torch.max(outputs, 1)
+            # IMPLEMENT SOFTMAX: Đưa Logits về Xác suất (Xác suất cao nhất sẽ là dự đoán)
+            probabilities = torch.nn.functional.softmax(outputs, dim=1)
+            _, preds = torch.max(probabilities, 1)
 
             for t, p in zip(labels.cpu().numpy(), preds.cpu().numpy()):
                 confusion[t][p] += 1
