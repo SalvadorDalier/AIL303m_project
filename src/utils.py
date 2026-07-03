@@ -43,6 +43,9 @@ def compute_precision_recall(model, dataloader, device=DEVICE, num_class=NUM_CLA
     # Confusion matrix: hang = actual, cot = predicted
     confusion = np.zeros((num_class, num_class), dtype=int)
 
+    # Biến cờ để chỉ in 5 ảnh đầu tiên của Batch đầu tiên cho đỡ rối màn hình
+    print_sample = True
+
     with torch.no_grad():
         for inputs, labels in dataloader:
             inputs = inputs.to(device)
@@ -51,6 +54,17 @@ def compute_precision_recall(model, dataloader, device=DEVICE, num_class=NUM_CLA
             outputs = model(inputs)
             # IMPLEMENT SOFTMAX: Đưa Logits về Xác suất (Xác suất cao nhất sẽ là dự đoán)
             probabilities = torch.nn.functional.softmax(outputs, dim=1)
+            
+            if print_sample:
+                print("\n" + "*"*60)
+                print("[+] XÁC SUẤT SOFTMAX (5 ẢNH ĐẦU TIÊN TRONG TẬP VALIDATION):")
+                for i in range(min(5, len(probabilities))):
+                    prob = probabilities[i].cpu().numpy() * 100
+                    true_label = labels[i].item()
+                    print(f"    - Ảnh {i+1}: {CLASS_NAMES[0]} = {prob[0]:5.2f}%, {CLASS_NAMES[1]} = {prob[1]:5.2f}% | (Thực tế: {CLASS_NAMES[true_label]})")
+                print("*"*60 + "\n")
+                print_sample = False
+                
             _, preds = torch.max(probabilities, 1)
 
             for t, p in zip(labels.cpu().numpy(), preds.cpu().numpy()):
