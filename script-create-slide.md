@@ -13,12 +13,12 @@
 - **Nội dung hiển thị (Visual):** Sơ đồ Pipeline tạo data giả lập, biểu đồ số lượng Dataset (2152 Train / 538 Valid).
 - **Phân tích chuyên sâu (In-depth):** 
   - Thay vì dùng các kỹ thuật Augmentation cơ bản (xoay, lật, chỉnh sáng - vốn không tạo ra tri thức mới), dự án áp dụng **CGAN (Conditional Generative Adversarial Networks)** dựa trên nghiên cứu học thuật tiên tiến.
-  - **Lý luận:** CGAN có khả năng học được phân phối không gian (spatial distribution) của các vết bệnh để tự động "vẽ" ra các khiếm khuyết giả lập (synthetic data) lên trái cây khỏe. Nhờ đó, tính đa dạng của tập Train tăng vọt, giúp mô hình giữ vững độ chính xác 81.16% ngay cả khi bị nén (pruning) xuống 50% kích thước.
+- Model CGAN đã giúp nhóm giải quyết được vấn đề 'data imbalance' trong mảng phân loại nông sản. Bằng cách tạo ra những bức ảnh nhân tạo giúp giải quyết được vấn đề thiếu hụt dữ liệu trong lĩnh vực này. 
 
 ## Slide 3: Chuẩn hóa Đầu vào (Data Preprocessing Pipeline)
 - **Nội dung hiển thị (Visual):** Dòng chảy xử lý ảnh: Raw Image -> Resize (224x224) -> Tensor -> Normalization.
 - **Phân tích chuyên sâu (In-depth):** 
-  - Mọi hình ảnh phải bị ép về kích thước tensor chuẩn `[B, 3, 224, 224]` để phù hợp với kiến trúc Receptive Field của các mạng CNN hiện đại.
+  - Mọi hình ảnh đều được thay đổi kích thước (Resize) về chuẩn `224x224` pixel (tạo thành dạng tensor `[Batch, 3, 224, 224]`). Lý do rất đơn giản: Các mạng CNN mà nhóm kế thừa (như VGG, ResNet) vốn được thiết kế và huấn luyện trên tập ImageNet với đầu vào mặc định là 224x224. Nếu đưa ảnh sai kích thước, các phép nhân ma trận trọng số (đặc biệt ở các lớp Fully Connected) sẽ bị báo lỗi không khớp chiều (shape mismatch) ngay lập tức.
   - **Trọng tâm kỹ thuật:** Giải thích lý do phải chuẩn hóa (Normalize) theo `mean=[0.485, 0.456, 0.406]` và `std=[0.229, 0.224, 0.225]`. Đây không phải là con số ngẫu nhiên, mà là dải phân phối thống kê của hàng triệu bức ảnh từ ImageNet. Nếu bỏ qua bước này, không gian vector của ảnh đầu vào sẽ lệch pha với không gian trọng số pre-trained, làm sụp đổ phương pháp Transfer Learning.
 
 ## Slide 4: Chiến lược Học chuyển giao (Transfer Learning Architecture)
