@@ -24,15 +24,16 @@
 - **Nội dung hiển thị (Visual):** Sơ đồ kiến trúc mạng (Ví dụ: DenseNet/VGG), biểu tượng ổ khóa (Freeze) ở phần thân và biểu tượng mở khóa ở phần đuôi Classifier.
 - **Phân tích chuyên sâu (In-depth):** 
   - Dự án khai thác 5 kiến trúc hàng đầu: GoogLeNet, DenseNet-121, ResNet-50, VGG-16, VGG-19.
-  - **Cơ chế hoạt động:** Sử dụng kỹ thuật "Đóng băng" (`requires_grad = False`) cho toàn bộ phần Feature Extractor. Các lớp Convolution (Tích chập) này vốn đã quá giỏi trong việc nhận diện góc cạnh, vân màu. Việc đóng băng giúp "khóa" chặt và bảo vệ các ma trận trọng số quý giá này; nếu không, những sai số (Loss) khổng lồ ở các epoch đầu tiên sẽ dội ngược lại (backpropagation) và phá hỏng toàn bộ trí nhớ mà mô hình đã cất công học từ tập ImageNet.
-  - Sau đó, nhóm tự tinh chỉnh và huấn luyện duy nhất cụm Fully Connected Layer (Classifier) cuối cùng để quy mô hình về bài toán 2 nơ-ron (Healthy/Unhealthy).
+  - **Cơ chế hoạt động:** Sử dụng kỹ thuật "Đóng băng" (`requires_grad = False`) cho toàn bộ phần Feature Extractor. Các lớp Convolution (Tích chập) này vốn đã quá giỏi trong việc nhận diện góc cạnh, vân màu. Việc đóng băng ma trận là thực sự cần thiết
+  - nếu không, những sai số (Loss) khổng lồ ở các epoch đầu tiên sẽ dội ngược lại (backpropagation) và phá hỏng toàn bộ trí nhớ mà mô hình đã cất công học từ tập ImageNet.
+  - Sau đó, nhóm tự tinh chỉnh và huấn luyện duy nhất cụm Fully Connected Layer (Classifier) cuối cùng để quy mô hình về bài toán 2 classes (Healthy/Unhealthy).
 
 ## Slide 5: Hàm Tối ưu & Hàm Mất mát (Optimization & Loss Logic)
-- **Nội dung hiển thị (Visual):** Công thức CrossEntropy, tham số thuật toán Adam Optimizer (`lr=1e-3` / `1e-4`).
-- **Phân tích chuyên sâu (In-depth):** *(Đây là phần bắt buộc phải hiểu sâu để bảo vệ đồ án)*
+- **Nội dung hiển thị (Visual):** Công thức CrossEntropy, tham số thuật toán Adam Optimizer (`lr=1e-3`)
   - Khẳng định bài toán **không sử dụng hàm Sigmoid**. Sigmoid chỉ phù hợp với phân loại đa nhãn độc lập (Multi-label).
-  - Hàm **`CrossEntropyLoss`** trong PyTorch là sự kết hợp toán học trực tiếp của **`LogSoftmax`** và **`NLLLoss`** (Negative Log Likelihood Loss). Softmax đảm bảo tổng xác suất của 2 nơ-ron đầu ra luôn bằng 1 (tạo thành một phân phối xác suất chuẩn), và NLLLoss sẽ tối ưu hóa khoảng cách Kullback-Leibler giữa dự đoán và nhãn thực tế.
-  - Ở khâu Inference (Dự đoán), để phân giải chốt hạ ảnh thuộc nhãn nào, mô hình sử dụng hàm **`torch.max()` (Argmax)** để lấy index của nơ-ron có Logit lớn nhất.
+  - Hàm **`CrossEntropyLoss`** trong PyTorch là sự kết hợp của 2 hàm **`LogSoftmax`** và **`NLLLoss`** (Negative Log Likelihood Loss). Softmax đảm bảo tổng xác suất của 2 nơ-ron đầu ra luôn bằng 1 (tạo thành một phân phối xác suất chuẩn). Còn NLLLoss sẽ đóng vai trò "trừng phạt": Nếu máy dự đoán sai mà lại đưa ra % tự tin càng cao thì điểm phạt (Loss) trả về sẽ càng lớn, ép mô hình phải điều chỉnh lại trọng số cho đúng.
+  - Ở khâu prediction, để phân giải chốt hạ ảnh thuộc nhãn nào, mô hình sử dụng hàm **`torch.max()` (Argmax)** để lấy index của nơ-ron có số Logit lớn nhất.
+  ps: số logit là output của lớp cuối cùng fc ép ma trận lại thành 1 dãy số dài.
 
 ## Slide 6: Triển khai Huấn luyện Đám mây (Cloud Computing via Modal)
 - **Nội dung hiển thị (Visual):** Sơ đồ quy trình đẩy luồng huấn luyện lên nền tảng Modal, kiến trúc Cloud Volume.
