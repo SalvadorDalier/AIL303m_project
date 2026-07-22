@@ -1,72 +1,73 @@
-# KỊCH BẢN THUYẾT TRÌNH CHI TIẾT: PHÂN LOẠI CHẤT LƯỢNG TRÁI CÂY (AIL303m)
-*(Lưu ý: Đây là kịch bản thoại chi tiết (word-by-word) dành cho 2 người thuyết trình. Các bạn có thể điều chỉnh lại văn phong cho thuận miệng)*
+# CẤU TRÚC THUYẾT TRÌNH CHUYÊN SÂU: PHÂN LOẠI CHẤT LƯỢNG TRÁI CÂY (AIL303m)
+*(Tài liệu này cung cấp luận điểm logic và chiều sâu kỹ thuật cho từng Slide, dùng làm tài liệu nền tảng để thiết kế PowerPoint và bảo vệ trước Hội đồng)*
 
 ---
 
-## 🎙️ PHẦN 1: MỞ ĐẦU & PHƯƠNG PHÁP CỐT LÕI (NGƯỜI A TRÌNH BÀY)
+## Slide 1: Đặt vấn đề & Thách thức cốt lõi (Problem Statement)
+- **Nội dung hiển thị (Visual):** Tên đề tài, hình ảnh minh họa trái cây khỏe và trái cây bị mốc/thối.
+- **Phân tích chuyên sâu (In-depth):** 
+  - Khẳng định đây không chỉ là bài toán phân loại nhị phân thông thường, mà là bài toán **thị giác máy tính vi mô** (nhận diện các khiếm khuyết nhỏ như vết nấm mốc - mould, hay vết thối rữa - gangrene trên bề mặt).
+  - Nhấn mạnh thách thức lớn nhất trong AI nông nghiệp: "Data Imbalance" (Mất cân bằng dữ liệu) và sự thiếu hụt nghiêm trọng các hình ảnh mẫu bệnh thực tế chất lượng cao.
 
-### Slide 1: Chào hỏi & Giới thiệu đề tài
-**[Người A nói]:** 
-"Dạ kính chào quý thầy cô trong Hội đồng và các bạn. Hôm nay, nhóm chúng em xin phép được trình bày đồ án với đề tài: **Phân loại Trái cây Khỏe mạnh và Sâu bệnh (Fruit Quality Classification)**. 
-Bài toán đặt ra là làm sao xây dựng được một mô hình AI có khả năng tự động soi chiếu và phát hiện các khiếm khuyết của trái cây như nấm mốc (mould) hay thối rữa (gangrene)."
+## Slide 2: Giải pháp Dữ liệu - Đột phá với CGAN
+- **Nội dung hiển thị (Visual):** Sơ đồ Pipeline tạo data giả lập, biểu đồ số lượng Dataset (2152 Train / 538 Valid).
+- **Phân tích chuyên sâu (In-depth):** 
+  - Thay vì dùng các kỹ thuật Augmentation cơ bản (xoay, lật, chỉnh sáng - vốn không tạo ra tri thức mới), dự án áp dụng **CGAN (Conditional Generative Adversarial Networks)** dựa trên nghiên cứu học thuật tiên tiến.
+  - **Lý luận:** CGAN có khả năng học được phân phối không gian (spatial distribution) của các vết bệnh để tự động "vẽ" ra các khiếm khuyết giả lập (synthetic data) lên trái cây khỏe. Nhờ đó, tính đa dạng của tập Train tăng vọt, giúp mô hình giữ vững độ chính xác 81.16% ngay cả khi bị nén (pruning) xuống 50% kích thước.
 
-### Slide 2: Khó khăn Dữ liệu & Giải pháp CGAN
-**[Người A nói]:**
-"Thưa thầy cô, khó khăn lớn nhất khi làm AI trong nông nghiệp là sự thiếu hụt dữ liệu ảnh bệnh thực tế. Để giải quyết, nhóm em đã tham khảo một bài báo nghiên cứu tiên tiến và ứng dụng **CGAN (Conditional GAN)**.
-Thay vì đi thu thập thêm ảnh thật, hệ thống CGAN này đã giúp nhóm sinh ra các dữ liệu ảnh trái cây sâu bệnh giả lập (synthetic data) có độ chân thực rất cao. Nhờ vậy, bộ dataset của nhóm đã được cân bằng và mở rộng lên mức lý tưởng là **2152 ảnh Training và 538 ảnh Validation**."
+## Slide 3: Chuẩn hóa Đầu vào (Data Preprocessing Pipeline)
+- **Nội dung hiển thị (Visual):** Dòng chảy xử lý ảnh: Raw Image -> Resize (224x224) -> Tensor -> Normalization.
+- **Phân tích chuyên sâu (In-depth):** 
+  - Mọi hình ảnh phải bị ép về kích thước tensor chuẩn `[B, 3, 224, 224]` để phù hợp với kiến trúc Receptive Field của các mạng CNN hiện đại.
+  - **Trọng tâm kỹ thuật:** Giải thích lý do phải chuẩn hóa (Normalize) theo `mean=[0.485, 0.456, 0.406]` và `std=[0.229, 0.224, 0.225]`. Đây không phải là con số ngẫu nhiên, mà là dải phân phối thống kê của hàng triệu bức ảnh từ ImageNet. Nếu bỏ qua bước này, không gian vector của ảnh đầu vào sẽ lệch pha với không gian trọng số pre-trained, làm sụp đổ phương pháp Transfer Learning.
 
-### Slide 3: Quy chuẩn Input / Output & Hàm Ra Quyết định
-**[Người A nói]:**
-"Về thiết kế cốt lõi của hệ thống:
-- **Đầu vào (Input):** Mọi bức ảnh đưa vào đều được tiền xử lý Resize về chuẩn `224x224` pixel, và chuẩn hóa (Normalize) theo dải màu của tập ImageNet.
-- **Đầu ra (Output):** Mô hình xuất ra 2 nơ-ron điểm số tương ứng với 2 nhãn: `0 (Healthy)` và `1 (Unhealthy)`.
-- **Cách AI chốt kết quả:** Để máy tính quyết định ảnh thuộc nhãn 0 hay nhãn 1, nhóm em sử dụng hàm **`torch.max()`** (hay còn gọi là hàm Argmax). Hàm này làm một phép toán rất cơ bản là so sánh điểm số của nơ-ron 0 và nơ-ron 1, bên nào điểm cao hơn thì mô hình sẽ phán quyết ảnh thuộc class đó."
+## Slide 4: Chiến lược Học chuyển giao (Transfer Learning Architecture)
+- **Nội dung hiển thị (Visual):** Sơ đồ kiến trúc mạng (Ví dụ: DenseNet/VGG), biểu tượng ổ khóa (Freeze) ở phần thân và biểu tượng mở khóa ở phần đuôi Classifier.
+- **Phân tích chuyên sâu (In-depth):** 
+  - Dự án khai thác 5 kiến trúc hàng đầu: GoogLeNet, DenseNet-121, ResNet-50, VGG-16, VGG-19.
+  - **Cơ chế hoạt động:** Sử dụng kỹ thuật "Đóng băng" (`requires_grad = False`) cho toàn bộ phần Feature Extractor. Các Convolutional Layers nông đã quá giỏi trong việc nhận diện góc cạnh, và các layer sâu đã quen với pattern phức tạp. Việc đóng băng giúp tránh hiện tượng "Catastrophic Forgetting" (Quên thảm họa) khi train trên miền dữ liệu mới.
+  - Sau đó, nhóm tự tinh chỉnh và huấn luyện duy nhất cụm Fully Connected Layer (Classifier) cuối cùng để quy mô hình về bài toán 2 nơ-ron (Healthy/Unhealthy).
 
-### Slide 4: Chiến lược Transfer Learning (Học chuyển giao)
-**[Người A nói]:**
-"Để tối ưu hóa thời gian huấn luyện, nhóm em không xây mạng AI từ con số 0. Chúng em sử dụng **Transfer Learning** trên 5 kiến trúc đình đám: GoogLeNet, DenseNet-121, ResNet-50, VGG-16 và VGG-19. 
-Chiến lược của nhóm gồm 2 bước: 
-Thứ nhất, **Đóng băng (Freeze)** toàn bộ phần thân mô hình (`requires_grad = False`). Việc này giúp AI tận dụng được con mắt nhìn hình khối đã quá giỏi của ImageNet mà không tốn công học lại. 
-Thứ hai, nhóm chỉ cắt bỏ chiếc đuôi cũ và **train lại một cụm Classifier mới** để chuyên biệt hóa cho việc phân biệt bệnh của trái cây."
+## Slide 5: Hàm Tối ưu & Hàm Mất mát (Optimization & Loss Logic)
+- **Nội dung hiển thị (Visual):** Công thức CrossEntropy, tham số thuật toán Adam Optimizer (`lr=1e-3` / `1e-4`).
+- **Phân tích chuyên sâu (In-depth):** *(Đây là phần bắt buộc phải hiểu sâu để bảo vệ đồ án)*
+  - Khẳng định bài toán **không sử dụng hàm Sigmoid**. Sigmoid chỉ phù hợp với phân loại đa nhãn độc lập (Multi-label).
+  - Hàm **`CrossEntropyLoss`** trong PyTorch là sự kết hợp toán học trực tiếp của **`LogSoftmax`** và **`NLLLoss`** (Negative Log Likelihood Loss). Softmax đảm bảo tổng xác suất của 2 nơ-ron đầu ra luôn bằng 1 (tạo thành một phân phối xác suất chuẩn), và NLLLoss sẽ tối ưu hóa khoảng cách Kullback-Leibler giữa dự đoán và nhãn thực tế.
+  - Ở khâu Inference (Dự đoán), để phân giải chốt hạ ảnh thuộc nhãn nào, mô hình sử dụng hàm **`torch.max()` (Argmax)** để lấy index của nơ-ron có Logit lớn nhất.
 
-### Slide 5: Tối ưu & Hàm Mất mát (Chống phản biện)
-**[Người A nói]:**
-"Trong quá trình Train, nhóm em dùng thuật toán **Adam** với Learning rate là `0.001` (hoặc `0.0001` tùy mạng) để mô hình hội tụ nhanh nhất. Hàm mất mát được sử dụng là **CrossEntropyLoss**.
+## Slide 6: Triển khai Huấn luyện Đám mây (Cloud Computing via Modal)
+- **Nội dung hiển thị (Visual):** Sơ đồ quy trình đẩy luồng huấn luyện lên nền tảng Modal, kiến trúc Cloud Volume.
+- **Phân tích chuyên sâu (In-depth):** 
+  - Trình bày kỹ năng MLOps (Machine Learning Operations). Thay vì train cục bộ gây quá tải phần cứng, job được đóng gói và đẩy lên máy chủ đám mây.
+  - Điểm sáng: Tích hợp cơ chế **Persistent Volume** (Ổ cứng ảo). Giải quyết triệt để rủi ro mất kết nối mạng (Network Timeout) trong quá trình train hàng chục epochs kéo dài nhiều giờ; file trọng số (Weights) được lưu an toàn trên mây và kéo về bằng script độc lập.
 
-*(Nếu Hội đồng ngắt lời hỏi: Hàm này phân loại 2 nhãn thì có dùng Sigmoid không?)*
--> **[Người A đáp ngay]:** Dạ thưa thầy/cô không ạ. Hàm `CrossEntropyLoss` trong PyTorch không hề tích hợp Sigmoid. Nó tích hợp hàm **LogSoftmax** kết hợp với **NLLLoss**. Vì mạng của nhóm em xuất ra 2 nơ-ron nên tụi em dùng nguyên lý Softmax để tổng 2 xác suất bằng 100%, chứ không dùng Sigmoid (BCE Loss) như mô hình 1 nơ-ron ạ!"
+## Slide 7: Đánh giá Hiệu năng & Đặc tính Mô hình (Evaluation Metrics)
+- **Nội dung hiển thị (Visual):** Bảng tổng hợp Precision, Recall và Confusion Matrix của 5 mô hình.
+- **Phân tích chuyên sâu (In-depth):** Đưa ra góc nhìn mổ xẻ sự khác biệt về kiến trúc dẫn đến hiệu năng khác nhau:
+  - **DenseNet-121:** Là mạng có khả năng nối chéo (Skip-connections) cực kỳ dày đặc, giúp "tái sử dụng đặc trưng" (Feature Reuse) tối đa. Nhờ vậy, nó cực kỳ nhạy cảm với các vết bệnh vi mô, đạt **Recall Unhealthy cao nhất (89.03%)**. Phù hợp làm màng lọc khắt khe trong kiểm định.
+  - **VGG-16 & VGG-19:** Kiến trúc tuyến tính sâu, qua nhiều tầng Max Pooling làm phẳng dữ liệu khiến nó bao dung hơn. Hệ quả là nó cực kỳ xuất sắc trong việc bảo vệ trái cây khỏe (**Recall Healthy > 94%**), hiếm khi phán oan trái ngon.
 
----
-*(Người A nhường lời cho Người B)*
----
+## Slide 8: Hiện tượng Dữ liệu học thuật (Overconfidence Calibration)
+- **Nội dung hiển thị (Visual):** Log Output của VGG in ra xác suất tuyệt đối `100.00%` và `0.00%`.
+- **Phân tích chuyên sâu (In-depth):** 
+  - Giải đáp thắc mắc về con số tuyệt đối: Đây không phải là Data Leakage (Rò rỉ dữ liệu). Đây là hiện tượng **Overconfidence** (Lệch chuẩn tự tin) kinh điển trong Deep Learning.
+  - Lý do toán học: Do mạng VGG quá sâu, biên độ trọng số ở lớp Fully Connected cuối cùng rất lớn. Khi các điểm số (Logits) chênh lệch nhau lớn và đi qua hàm Exponential của Softmax, sự chênh lệch bị khuếch đại vô hạn, đẩy % xác suất lọt vào các thái cực tuyệt đối 1 và 0. 
 
-## 🎙️ PHẦN 2: THỰC NGHIỆM, XAI & KẾT LUẬN (NGƯỜI B TRÌNH BÀY)
+## Slide 9: Minh bạch hóa Hộp đen AI (Explainable AI - XAI)
+- **Nội dung hiển thị (Visual):** Các bức ảnh biểu đồ nhiệt (Heatmap) nội soi từ thuật toán Grad-CAM.
+- **Phân tích chuyên sâu (In-depth):** 
+  - Giải quyết bài toán "Black-box" (Hộp đen) của AI. Nhóm ứng dụng **Grad-CAM (Gradient-weighted Class Activation Mapping)**.
+  - Cơ chế: Bằng cách gắn Hook vào các Convolutional Layer cuối cùng, tính đạo hàm ngược (Backward Gradients) để lấy trọng số không gian, sau đó nhân chập với Feature Maps.
+  - Kết quả: Chứng minh rõ ràng trước Hội đồng rằng AI thực sự học được cách "nhìn" vào các vết nấm mốc (vùng màu đỏ trên Heatmap) để ra quyết định, chứ không hề học vẹt phần background.
 
-### Slide 6: Kết quả Huấn luyện (Train trên Cloud)
-**[Người B nói]:**
-"Cảm ơn bạn A. Tiếp theo, em xin trình bày về phần thực nghiệm. Nhằm đối phó với việc khối lượng tính toán quá lớn, nhóm em đã đưa toàn bộ code lên nền tảng đám mây **Modal**. Việc này giúp giải phóng GPU máy cá nhân, đồng thời nhóm đã lập trình một cơ chế *Két sắt ảo (Cloud Volume)* để nếu mạng có bị đứt giữa chừng thì trọng số (Weights) vẫn được bảo toàn và tải về an toàn."
+## Slide 10: Xây dựng Pipeline Dự đoán Thực tế (End-to-End Inference)
+- **Nội dung hiển thị (Visual):** Demo kiến trúc file `predict.py`, giao diện dòng lệnh trả kết quả %.
+- **Phân tích chuyên sâu (In-depth):** 
+  - Trình bày vòng đời cuối cùng của sản phẩm: Từ 1 bức ảnh thô -> Đi qua toàn bộ ma trận trọng số (Weights `.pth` / `.npy`) đã train -> Xuất ra Logits thô.
+  - Áp dụng toán học `F.softmax` tại bước cuối cùng để phiên dịch Logits thành xác suất phần trăm, cung cấp một kết quả trực quan, dễ hiểu và sẵn sàng tích hợp vào phần mềm cho người nông dân sử dụng.
 
-### Slide 7: So sánh 5 Mô hình (Confusion Matrix & Recall)
-**[Người B nói]:**
-"Trên màn hình là bảng đối chiếu chỉ số **Precision** và **Recall** của 5 mô hình trên tập Validation (538 ảnh).
-Nhìn vào bảng, ta thấy 2 thái cực hoàn toàn khác nhau:
-- **Nhà vô địch khắt khe - DenseNet-121:** Mô hình này tóm trái cây bệnh giỏi nhất, đạt Recall Unhealthy lên tới **89.03%**. Tức là nó thà giết lầm chứ không bỏ sót, rất an toàn để chặn hàng hỏng ra thị trường.
-- **Nhà vô địch bao dung - VGG:** VGG-16 và VGG-19 lại xuất sắc trong việc khẳng định trái cây khỏe (Recall Healthy đạt mức khổng lồ trên **94%**). Rất ít trái ngon nào bị VGG phân loại oan."
-
-### Slide 8: Phân tích hiện tượng Overconfidence
-**[Người B nói]:**
-"Có một hiện tượng thú vị ở mô hình VGG là khi xuất % xác suất, nó thường xuyên trả về mức tuyệt đối là `100.00%` và `0.00%`. Nhóm em đã nghiên cứu và phát hiện đây là hiện tượng **Overconfidence (Quá tự tin)** rất đặc trưng của Deep Learning. Do kiến trúc VGG quá sâu, các tham số điểm số (Logits) trở nên cực kỳ lớn, đẩy hàm Softmax lọt vào các thái cực tiệm cận 1 và 0. Khẳng định đây không phải là lỗi rò rỉ dữ liệu (data leakage) mà là bản chất của kiến trúc!"
-
-### Slide 9: Giải thích AI (Explainable AI - Grad-CAM)
-**[Người B nói]:**
-"Để chứng minh cho Hội đồng thấy mô hình không hề học vẹt, nhóm em đã tích hợp thuật toán **Grad-CAM**. Trên màn hình là biểu đồ Nhiệt (Heatmap). Vùng màu đỏ chính là vị trí mà mạng Nơ-ron đang tập trung sự chú ý. 
-Như thầy cô thấy, con AI đã 'nhìn' trúng phóc vào vết nấm mốc để đưa ra quyết định Unhealthy. *(Thêm vào nếu muốn: Trong quá trình làm XAI, nhóm em đã khắc phục thành công rào cản In-place ReLU của DenseNet và lỗi Gradient biến mất do Freeze layers để sinh ra được bức ảnh này ạ).* "
-
-### Slide 10: Ứng dụng Thực tế (Sản phẩm đầu cuối)
-**[Người B nói]:**
-"Cuối cùng, nhóm không chỉ dừng lại ở chỉ số lý thuyết. Nhóm đã đóng gói một kịch bản dự đoán `predict.py`. Khi đưa một bức ảnh bất kỳ ở đời thực vào, mô hình sẽ tự động trích xuất điểm số, sau đó áp dụng toán học **Softmax** để dịch ra tỷ lệ % trực quan cho người nông dân (Ví dụ: Khỏe mạnh 98%, Sâu bệnh 2%)."
-
-### Slide 11: Lời Kết & Q&A
-**[Người B nói]:**
-"Tóm lại, đồ án đã chứng minh việc kết hợp Transfer Learning, CGAN Data và Explainable AI mang lại một quy trình kiểm định chất lượng nông sản cực kỳ mạnh mẽ và minh bạch. 
-Phần trình bày của nhóm đến đây là kết thúc. Chúng em xin cảm ơn quý thầy cô đã lắng nghe và rất mong nhận được những góp ý, câu hỏi từ Hội đồng ạ!"
+## Slide 11: Tổng kết & Hướng phát triển tương lai
+- **Nội dung hiển thị (Visual):** Tóm tắt 3 điểm mạnh nhất của dự án và các bước tiếp theo.
+- **Phân tích chuyên sâu (In-depth):** 
+  - Tổng kết: Hoàn thiện thành công một Pipeline ML hiện đại kết hợp CGAN (Tạo dữ liệu), Transfer Learning (Huấn luyện tối ưu) và XAI (Giải thích minh bạch).
+  - Hướng phát triển: Đưa mô hình lên API/Web-app hoặc nén mô hình (Pruning/Quantization) để chạy trên thiết bị di động (Edge Devices) ngoài thực địa.
