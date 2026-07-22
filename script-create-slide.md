@@ -1,33 +1,55 @@
-# Script Thuyết trình Đồ án: Phân loại Trái cây (Fruit Quality Classification)
-
-## Slide 1: Giới thiệu & Định nghĩa Dữ liệu (Input & Output)
-- **Input của Model:**
-  - Ảnh RGB (3 kênh màu), được tiền xử lý Resize về kích thước chuẩn `224x224` pixel (chuẩn của các kiến trúc CNN hiện đại).
-  - Ảnh được chuẩn hóa (Normalize) theo mean/std của ImageNet để đồng bộ với Transfer Learning: `mean=[0.485, 0.456, 0.406]`, `std=[0.229, 0.224, 0.225]`.
-- **Output của Model:**
-  - Là 2 nơ-ron xuất (2 logits) tương ứng với 2 nhãn phân loại nhị phân:
-    - `0`: Healthy (Trái cây khỏe mạnh/bình thường)
-    - `1`: Unhealthy (Trái cây bị bệnh, mốc, thối - mould/gangrene)
-  - Ở khâu ứng dụng thực tế (Inference/Predict), Logits này được ép qua hàm Softmax để tính ra **% xác suất** (VD: Healthy = 95%, Unhealthy = 5%).
-
-## Slide 2: Kiến trúc & Hàm Tối ưu (Optimizer)
-- **Hàm tối ưu (Optimized Function):**
-  - Toàn bộ các mô hình (GoogLeNet, DenseNet, ResNet, VGG) đều được huấn luyện bằng thuật toán **Adam Optimizer**.
-  - Tốc độ học (Learning Rate): `0.001` (hoặc `0.0001` tùy model), giúp mô hình hội tụ nhanh và tránh bị kẹt ở cực tiểu địa phương.
-
-- **Hàm mất mát (Loss Function - Đính chính kiến thức):**
-  - Trong dự án, ta dùng **`CrossEntropyLoss`**.
-  - *Lưu ý cực kỳ quan trọng khi bị Hội đồng phản biện:* `CrossEntropyLoss` trong PyTorch **KHÔNG** tự động thêm hàm `Sigmoid`! Thay vào đó, nó tự động tích hợp **`LogSoftmax` + `NLLLoss`** (Negative Log Likelihood Loss) ngay bên trong hàm. 
-  - Đó là lý do tại sao ở file Train ta không cần gọi hàm Softmax, nhưng khi đem đi Test (`predict.py`) thì ta phải tự thêm Softmax vào để dịch ra phần trăm (%). *(Nếu dùng Sigmoid thì đó là hàm `BCEWithLogitsLoss` dùng cho multi-label, không phải hàm đang dùng trong dự án này).*
-
-## Slide 3: Kỹ thuật Trích xuất Đặc trưng (Feature Extraction)
-Feature Extraction trong dự án này được thiết kế theo cơ chế **Transfer Learning (Học chuyển giao)**, cụ thể theo 3 bước:
-1. **Sử dụng sức mạnh tiền nhân:** Kế thừa các mô hình kiến trúc sâu (DenseNet, VGG, ResNet...) đã được huấn luyện sẵn (Pre-trained) trên kho dữ liệu khổng lồ ImageNet.
-2. **Đóng băng (Freeze) lớp trích xuất:** Khóa toàn bộ tham số của phần thân mô hình (Feature Extractor) bằng lệnh `requires_grad = False`. Việc này giúp ta tận dụng được khả năng nhận diện hình khối, góc cạnh, vân màu rất sắc sảo của AI có sẵn mà không tốn công/thời gian dạy lại từ đầu.
-3. **Thay mới và Huấn luyện lớp phân loại (Classifier):** Cắt bỏ lớp dự đoán 1000 class cũ của ImageNet, thay bằng một cụm mạng Neural mới (gồm Linear, ReLU, Dropout, và lớp xuất ra 2 class). Quá trình Training thực chất chỉ là việc "dạy" cho cái đuôi mô hình này cách xâu chuỗi các đặc trưng đã được trích xuất để chốt hạ xem trái cây bị bệnh hay khỏe.
+# Script Thuyết trình Đồ án: Phân loại Trái cây (AIL303m)
+*Kịch bản dành cho 2 người thuyết trình (Dự kiến 10-15 phút)*
 
 ---
-### 💡 Đề xuất thêm (Gợi ý từ tôi để Slide của bạn "Ăn điểm" cao hơn):
-Nếu có đủ thời lượng và không gian thuyết trình, bạn cân nhắc đưa thêm 2 Slide này vào nhé (rất ăn tiền học thuật):
-1. **Slide 4: Xử lý Hạn chế Dữ liệu bằng CGAN:** Nói về việc dùng *Conditional GAN* để sinh thêm dữ liệu ảnh giả lập (synthetic data), bù đắp sự thiếu hụt ảnh trái cây bệnh. Hãy nhấn mạnh đây là pipeline (quy trình) tiên tiến được chứng minh từ bài báo gốc.
-2. **Slide 5: Mô phỏng "Mắt AI" bằng XAI (Grad-CAM):** Trình diễn các hình ảnh Heatmap đỏ-xanh xuất ra từ file `explain.py`. Giải thích cho Hội đồng rằng: *"Nhóm chúng em không chỉ làm ra AI phân loại vẹt, mà còn buộc nó phải chỉ ra chính xác vết nấm mốc nằm ở đâu trên trái cây bằng Grad-CAM!"*. Khúc này đảm bảo Hội đồng sẽ rất ấn tượng.
+
+## PHẦN 1: TỔNG QUAN & PHƯƠNG PHÁP LÕI (NGƯỜI A TRÌNH BÀY)
+
+### Slide 1: Giới thiệu Đề tài (Title)
+- **Nội dung:** Tên đề tài, Tên thành viên, Giảng viên hướng dẫn.
+
+### Slide 2: Đặt vấn đề & Khó khăn dữ liệu
+- **Nội dung:** Bài toán phân loại trái cây Khỏe (Healthy) và Bệnh (Unhealthy).
+- **Điểm nhấn:** Khó khăn lớn nhất của học sâu là thiếu dữ liệu. Nhóm đã áp dụng phương pháp tiên tiến từ bài báo nghiên cứu: Dùng **CGAN (Conditional GAN)** để sinh thêm dữ liệu giả lập (synthetic data) mô phỏng các vết nấm mốc (mould) và thối rữa (gangrene). (Dataset nâng lên 2152 Train / 538 Valid).
+
+### Slide 3: Định nghĩa Input & Output
+- **Input:** Ảnh RGB, tiền xử lý Resize về `224x224` pixel, chuẩn hóa (Normalize) theo tập ImageNet.
+- **Output:** 2 Nơ-ron (Logits) tương ứng 2 nhãn 0 (Healthy) và 1 (Unhealthy). Khi ứng dụng thực tế sẽ đi qua hàm **Softmax** để xuất ra % xác suất.
+
+### Slide 4: Kỹ thuật Trích xuất Đặc trưng (Transfer Learning)
+- Trình bày 3 bước xây dựng mô hình:
+  1. Kế thừa kiến trúc sâu (DenseNet, VGG, ResNet) đã pre-train trên ImageNet.
+  2. **Đóng băng (Freeze)** phần thân (`requires_grad = False`) để tiết kiệm chi phí tính toán, giữ lại khả năng trích xuất hình khối, vân màu cực tốt của AI.
+  3. Cắt bỏ lớp xuất cũ, **thay và train lại lớp Classifier mới** để chuyên biệt hóa cho trái cây.
+
+### Slide 5: Hàm Tối ưu & Hàm Mất mát (Câu hỏi bẫy của Hội đồng)
+- **Optimizer:** Adam (Tốc độ học 0.001 hoặc 0.0001).
+- **Loss Function:** Dùng `CrossEntropyLoss`. 
+- **⚠️ Kịch bản chống phản biện:** Nếu bị vặn hỏi *"Hàm này có tự động add Sigmoid không?"*. Bạn A dõng dạc trả lời: *"Dạ không, CrossEntropyLoss trong PyTorch tích hợp **LogSoftmax + NLLLoss**. Do cấu trúc xuất ra 2 nơ-ron nên nhóm dùng Softmax để tổng 2 xác suất bằng 100%, chứ không dùng Sigmoid (dành cho 1 nơ-ron / Multi-label) ạ!"*.
+
+---
+
+## PHẦN 2: ĐÁNH GIÁ, KẾT QUẢ & XAI (NGƯỜI B TRÌNH BÀY)
+
+### Slide 6: Kết quả Huấn luyện trên Cloud
+- Nhóm đã cấu hình đưa việc training lên nền tảng đám mây **Modal**. Vừa tiết kiệm tài nguyên máy cá nhân, vừa tích hợp cơ chế Cloud Volume (Két sắt trên mây) để giữ an toàn cho file trọng số (Weights) nếu bị rớt mạng.
+
+### Slide 7: Bảng Đánh giá 5 Mô hình (Confusion Matrix & Recall)
+- **Nội dung:** Đưa bảng LaTeX chứa chỉ số Precision & Recall của 5 mô hình vào đây.
+- **Phân tích của Người B:** 
+  - **DenseNet-121:** Làm việc khắt khe nhất, khả năng tóm trái cây thối đỉnh nhất (Recall Unhealthy = 89.03%). Thà giết lầm không bỏ sót.
+  - **VGG-16 & VGG-19:** Rất bao dung, khả năng khẳng định trái cây khỏe xuất sắc (Recall Healthy > 94%). 
+
+### Slide 8: Khám phá thú vị: Hiện tượng Overconfidence
+- **Nội dung:** Đưa ảnh chụp màn hình % Softmax của VGG (báo 100% và 0%).
+- **Kịch bản:** *"Khi chạy thực tế, VGG thường xuất ra xác suất tuyệt đối 100%. Đây không phải lỗi code, mà là hiện tượng **Overconfidence (Quá tự tin)** rất đặc trưng của các mạng Neural sâu như VGG khi fine-tune. Trọng lượng mạng lớn đẩy hàm Softmax về các thái cực tuyệt đối."*
+
+### Slide 9: "Mắt AI" - Explainable AI (Grad-CAM)
+- **Nội dung:** Trình diễn ảnh Heatmap đỏ/xanh từ file `explain.py`.
+- **Kịch bản:** *"Để chứng minh AI không học vẹt, nhóm dùng Grad-CAM nội soi mô hình. Vùng màu Đỏ trên màn hình minh chứng AI đang chú ý chính xác vào vết nấm mốc để đưa ra quyết định Unhealthy."*
+
+### Slide 10: Demo Ứng dụng Thực tế (`predict.py`)
+- Show video hoặc ảnh chụp Terminal chạy lệnh `predict.py`, in ra tỷ lệ % cho một bức ảnh cụ thể. Minh chứng sản phẩm hoàn thiện từ A-Z.
+
+### Slide 11: Kết luận & Hướng phát triển
+- Chốt lại thành quả đạt được và gửi lời cảm ơn Hội đồng. Dành thời gian cho Q&A.
