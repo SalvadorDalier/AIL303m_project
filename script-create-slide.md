@@ -22,10 +22,10 @@
   2. **Đóng băng (Freeze)** phần thân (`requires_grad = False`) để tiết kiệm chi phí tính toán, giữ lại khả năng trích xuất hình khối, vân màu cực tốt của AI.
   3. Cắt bỏ lớp xuất cũ, **thay và train lại lớp Classifier mới** để chuyên biệt hóa cho trái cây.
 
-### Slide 5: Hàm Tối ưu & Hàm Mất mát (Câu hỏi bẫy của Hội đồng)
-- **Optimizer:** Adam (Tốc độ học 0.001 hoặc 0.0001).
-- **Loss Function:** Dùng `CrossEntropyLoss`. 
-- **⚠️ Kịch bản chống phản biện:** Nếu bị vặn hỏi *"Hàm này có tự động add Sigmoid không?"*. Bạn A dõng dạc trả lời: *"Dạ không, CrossEntropyLoss trong PyTorch tích hợp **LogSoftmax + NLLLoss**. Do cấu trúc xuất ra 2 nơ-ron nên nhóm dùng Softmax để tổng 2 xác suất bằng 100%, chứ không dùng Sigmoid (dành cho 1 nơ-ron / Multi-label) ạ!"*.
+### Slide 5: Hàm Mất mát & Hàm Ra Quyết định (Câu hỏi bẫy của Hội đồng)
+- **Loss Function (Hàm Mất mát lúc huấn luyện):** Dùng `CrossEntropyLoss`. 
+- **⚠️ Đính chính kiến thức:** Nếu bị vặn hỏi *"Hàm này có dùng Sigmoid không?"*. Bạn A dõng dạc trả lời: *"Dạ không, CrossEntropyLoss trong PyTorch tích hợp **LogSoftmax + NLLLoss**. Do cấu trúc xuất ra 2 nơ-ron nên nhóm dùng Softmax để tổng 2 xác suất bằng 100%, chứ không dùng Sigmoid (dành cho 1 nơ-ron / Multi-label) ạ!"*.
+- **Decision Function (Hàm chốt hạ kết quả 0 hay 1):** Để máy tính thực sự quyết định ảnh thuộc nhãn `0 (Healthy)` hay `1 (Unhealthy)`, dự án dùng hàm **`torch.max()`** (hay còn gọi là hàm *Argmax*). Hàm này đơn giản là so sánh điểm số (Logit) hoặc % xác suất của cả 2 nơ-ron, nơ-ron nào có điểm cao hơn thì mô hình sẽ phán quyết thuộc class đó.
 
 ---
 
