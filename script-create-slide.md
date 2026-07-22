@@ -35,12 +35,11 @@
   - Ở khâu prediction, để phân giải chốt hạ ảnh thuộc nhãn nào, mô hình sử dụng hàm **`torch.max()` (Argmax)** để lấy index của nơ-ron có số Logit lớn nhất.
   ps: số logit là output của lớp cuối cùng fc ép ma trận lại thành 1 dãy số dài.
 
-## Slide 6: Triển khai Huấn luyện Cục bộ (Local Training với GPU RTX 4060)
-- **Nội dung hiển thị (Visual):** Thông số cấu hình phần cứng (NVIDIA RTX 4060 8GB VRAM) và sơ đồ luồng huấn luyện cục bộ (Local Training Pipeline).
+## Slide 6: Chiến lược Huấn luyện Lai (Local RTX 4060 & Colab Tesla T4)
+- **Nội dung hiển thị (Visual):** Bảng so sánh thông số phần cứng (Local RTX 4060 8GB vs Colab Tesla T4 15GB VRAM).
 - **Phân tích chuyên sâu (In-depth):** 
-  - Toàn bộ 5 mô hình kiến trúc sâu trong dự án đều được triển khai huấn luyện trực tiếp trên môi trường máy tính cá nhân (Local) thông qua sức mạnh tăng tốc phần cứng của card đồ họa **NVIDIA RTX 4060**. 
-  - Việc tận dụng GPU kiến trúc mới với hệ thống nhân CUDA Core giúp tối ưu hóa triệt để tốc độ tính toán đạo hàm và nhân ma trận (Matrix Multiplication), rút ngắn đáng kể thời gian training so với chạy trên CPU hay các dịch vụ Cloud miễn phí.
-  - Hơn nữa, quá trình huấn luyện Local mang lại lợi thế tuyệt đối trong việc giám sát và kiểm soát dòng chảy bộ nhớ (VRAM); nhờ đó, nhóm đã chủ động tinh chỉnh tham số Batch Size linh hoạt để ép các mô hình siêu nặng như VGG hay DenseNet chạy mượt mà mà không lo gặp lỗi tràn bộ nhớ (Out-Of-Memory).
+  - Nhóm áp dụng chiến lược huấn luyện phân tán linh hoạt (Hybrid) để tối ưu hóa nút thắt cổ chai về phần cứng. 3 mô hình (GoogLeNet, DenseNet, ResNet) được train trực tiếp trên máy Local, tận dụng nhân CUDA của RTX 4060 để đẩy nhanh tốc độ thực thi.
+  - Tuy nhiên, VGG-16 và VGG-19 là 2 kiến trúc tuyến tính được nhóm cho chạy trên T4-GPU của Tesla T4 
 
 ## Slide 7: Đánh giá Hiệu năng & Đặc tính Mô hình (Evaluation Metrics)
 - **Nội dung hiển thị (Visual):** Bảng tổng hợp Precision, Recall và Confusion Matrix của 5 mô hình.
