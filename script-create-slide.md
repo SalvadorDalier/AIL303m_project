@@ -4,10 +4,13 @@
 ---
 
 ## Slide 1: Đặt vấn đề & Thách thức cốt lõi (Problem Statement)
-- **Nội dung hiển thị (Visual):** Tên đề tài, hình ảnh minh họa trái cây khỏe và trái cây bị mốc/thối.
+- **Nội dung hiển thị (Visual):** Tên đề tài, hình ảnh minh họa trái cây khỏe và trái cây bị mốc/thối, kèm theo biểu đồ bánh (Pie Chart) chênh lệch số lượng mẫu thực tế.
 - **Phân tích chuyên sâu (In-depth):** 
   - Khẳng định đây không chỉ là bài toán phân loại nhị phân thông thường, mà là bài toán **thị giác máy tính vi mô** (nhận diện các khiếm khuyết nhỏ như vết nấm mốc - mould, hay vết thối rữa - gangrene trên bề mặt).
-  - Nhấn mạnh thách thức lớn nhất trong AI nông nghiệp: "Data Imbalance" (Mất cân bằng dữ liệu) và sự thiếu hụt nghiêm trọng các hình ảnh mẫu bệnh thực tế chất lượng cao.
+  - **Chứng minh sự mất cân bằng dữ liệu (Data Imbalance):**
+    - *Về mặt thực tế:* Trong nông nghiệp, việc thu thập ảnh trái cây khỏe mạnh (Healthy) cực kỳ dễ dàng (chỉ cần ra vườn chụp hàng ngàn tấm). Nhưng để săn được ảnh trái cây bị mốc/thối tự nhiên là rất hiếm và khó kiểm soát.
+    - *Hậu quả lên AI:* Nếu mang một dataset chênh lệch (VD: 1000 ảnh Khỏe - 100 ảnh Bệnh) đi train, AI sẽ bị hội chứng "lười biếng" (Bias). Nó chỉ cần nhắm mắt phán tất cả là "Khỏe" thì độ chính xác tổng vẫn đạt 90%. Hậu quả là nó sẽ mù lòa hoàn toàn trước trái cây bệnh.
+    - *Lật vấn đề:* Đây chính là lý do dự án bắt buộc phải tìm đến công nghệ sinh ảnh giả lập (CGAN) ở Slide tiếp theo để cứu vãn sự mất cân bằng này!
 
 ## Slide 2: Giải pháp Dữ liệu - Đột phá với CGAN
 - **Nội dung hiển thị (Visual):** Sơ đồ Pipeline tạo data giả lập, biểu đồ số lượng Dataset (2152 Train / 538 Valid).
