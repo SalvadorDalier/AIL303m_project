@@ -47,12 +47,12 @@
   - **DenseNet-121:** Là mạng có khả năng nối chéo (Skip-connections) cực kỳ dày đặc, giúp "tái sử dụng đặc trưng" (Feature Reuse) tối đa. Nhờ vậy, nó cực kỳ nhạy cảm với các vết bệnh vi mô, đạt **Recall Unhealthy cao nhất (89.03%)**. Phù hợp làm màng lọc khắt khe trong kiểm định.
   - **VGG-16 & VGG-19:** Kiến trúc tuyến tính sâu, qua nhiều tầng Max Pooling làm phẳng dữ liệu khiến nó bao dung hơn. Hệ quả là nó cực kỳ xuất sắc trong việc bảo vệ trái cây khỏe (**Recall Healthy > 94%**), hiếm khi phán oan trái ngon.
 
-## Slide 8: Minh bạch hóa Hộp đen AI (Explainable AI - XAI)
-- **Nội dung hiển thị (Visual):** Các bức ảnh biểu đồ nhiệt (Heatmap) nội soi từ thuật toán Grad-CAM.
+## Slide 8: Giải thích Mô hình với Explainable AI (Giải quyết bài toán Hộp đen)
+- **Nội dung hiển thị (Visual):** Các bức ảnh biểu đồ nhiệt (Heatmap) xuất ra từ thuật toán Grad-CAM.
 - **Phân tích chuyên sâu (In-depth):** 
-  - Giải quyết bài toán "Black-box" (Hộp đen) của AI. Nhóm ứng dụng **Grad-CAM (Gradient-weighted Class Activation Mapping)**.
-  - Cơ chế: Bằng cách gắn Hook vào các Convolutional Layer cuối cùng, tính đạo hàm ngược (Backward Gradients) để lấy trọng số không gian, sau đó nhân chập với Feature Maps.
-  - Kết quả: Chứng minh rõ ràng trước Hội đồng rằng AI thực sự học được cách "nhìn" vào các vết nấm mốc (vùng màu đỏ trên Heatmap) để ra quyết định, chứ không hề học vẹt phần background.
+  - **Vấn đề Hộp đen (Black-box):** Từ trước đến nay, mạng CNN thường bị coi là "hộp đen". Khi nó phán 1 quả táo là "Unhealthy", con người không thể biết tại sao nó lại phán như vậy. Nó thực sự nhìn thấy vết nấm mốc, hay nó chỉ nhìn nhầm vào một cái bóng mờ ở background?
+  - **Giải pháp của nhóm (Grad-CAM):** Để chứng minh mô hình không hề "học vẹt", nhóm đã tích hợp thuật toán **Grad-CAM**. Thuật toán này hoạt động như một chiếc máy chụp X-quang, quét ngược từ kết quả cuối cùng về lại các lớp Tích chập (Convolution) để xem khu vực nào có trọng số ảnh hưởng cao nhất.
+  - **Kết luận:** Vùng màu Đỏ trên Heatmap thể hiện sự chú ý cao nhất của AI. Các biểu đồ nhiệt minh chứng rõ ràng rằng AI của nhóm đã thực sự học được cách focus ánh nhìn trực tiếp vào các vết nấm mốc / thối rữa trên bề mặt trái cây để ra quyết định.
 
 ## Slide 9: Xây dựng Pipeline Dự đoán Thực tế (End-to-End Inference)
 - **Nội dung hiển thị (Visual):** Demo kiến trúc file `predict.py`, giao diện dòng lệnh trả kết quả %.
@@ -64,4 +64,4 @@
 - **Nội dung hiển thị (Visual):** Tóm tắt 3 điểm mạnh nhất của dự án và các bước tiếp theo.
 - **Phân tích chuyên sâu (In-depth):** 
   - Tổng kết: Hoàn thiện thành công một Pipeline ML hiện đại kết hợp CGAN (Tạo dữ liệu), Transfer Learning (Huấn luyện tối ưu) và XAI (Giải thích minh bạch).
-  - Hướng phát triển: Đưa mô hình lên API/Web-app hoặc nén mô hình (Pruning/Quantization) để chạy trên thiết bị di động (Edge Devices) ngoài thực địa.
+  - Hướng phát triển: Đưa mô hình lên API/Web-app hoặc nén mô hình để chạy trên thiết bị di động (Edge Devices) ngoài thực địa.
