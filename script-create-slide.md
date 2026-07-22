@@ -47,26 +47,20 @@
   - **DenseNet-121:** Là mạng có khả năng nối chéo (Skip-connections) cực kỳ dày đặc, giúp "tái sử dụng đặc trưng" (Feature Reuse) tối đa. Nhờ vậy, nó cực kỳ nhạy cảm với các vết bệnh vi mô, đạt **Recall Unhealthy cao nhất (89.03%)**. Phù hợp làm màng lọc khắt khe trong kiểm định.
   - **VGG-16 & VGG-19:** Kiến trúc tuyến tính sâu, qua nhiều tầng Max Pooling làm phẳng dữ liệu khiến nó bao dung hơn. Hệ quả là nó cực kỳ xuất sắc trong việc bảo vệ trái cây khỏe (**Recall Healthy > 94%**), hiếm khi phán oan trái ngon.
 
-## Slide 8: Hiện tượng Dữ liệu học thuật (Overconfidence Calibration)
-- **Nội dung hiển thị (Visual):** Log Output của VGG in ra xác suất tuyệt đối `100.00%` và `0.00%`.
-- **Phân tích chuyên sâu (In-depth):** 
-  - Giải đáp thắc mắc về con số tuyệt đối: Đây không phải là Data Leakage (Rò rỉ dữ liệu). Đây là hiện tượng **Overconfidence** (Lệch chuẩn tự tin) kinh điển trong Deep Learning.
-  - Lý do toán học: Do mạng VGG quá sâu, biên độ trọng số ở lớp Fully Connected cuối cùng rất lớn. Khi các điểm số (Logits) chênh lệch nhau lớn và đi qua hàm Exponential của Softmax, sự chênh lệch bị khuếch đại vô hạn, đẩy % xác suất lọt vào các thái cực tuyệt đối 1 và 0. 
-
-## Slide 9: Minh bạch hóa Hộp đen AI (Explainable AI - XAI)
+## Slide 8: Minh bạch hóa Hộp đen AI (Explainable AI - XAI)
 - **Nội dung hiển thị (Visual):** Các bức ảnh biểu đồ nhiệt (Heatmap) nội soi từ thuật toán Grad-CAM.
 - **Phân tích chuyên sâu (In-depth):** 
   - Giải quyết bài toán "Black-box" (Hộp đen) của AI. Nhóm ứng dụng **Grad-CAM (Gradient-weighted Class Activation Mapping)**.
   - Cơ chế: Bằng cách gắn Hook vào các Convolutional Layer cuối cùng, tính đạo hàm ngược (Backward Gradients) để lấy trọng số không gian, sau đó nhân chập với Feature Maps.
   - Kết quả: Chứng minh rõ ràng trước Hội đồng rằng AI thực sự học được cách "nhìn" vào các vết nấm mốc (vùng màu đỏ trên Heatmap) để ra quyết định, chứ không hề học vẹt phần background.
 
-## Slide 10: Xây dựng Pipeline Dự đoán Thực tế (End-to-End Inference)
+## Slide 9: Xây dựng Pipeline Dự đoán Thực tế (End-to-End Inference)
 - **Nội dung hiển thị (Visual):** Demo kiến trúc file `predict.py`, giao diện dòng lệnh trả kết quả %.
 - **Phân tích chuyên sâu (In-depth):** 
   - Trình bày vòng đời cuối cùng của sản phẩm: Từ 1 bức ảnh thô -> Đi qua toàn bộ ma trận trọng số (Weights `.pth` / `.npy`) đã train -> Xuất ra Logits thô.
-  - Áp dụng toán học `F.softmax` tại bước cuối cùng để phiên dịch Logits thành xác suất phần trăm, cung cấp một kết quả trực quan, dễ hiểu và sẵn sàng tích hợp vào phần mềm cho người nông dân sử dụng.
+  - Áp dụng hàm `F.softmax` tại bước cuối cùng để phiên dịch Logits thành xác suất phần trăm, cung cấp một kết quả trực quan, dễ hiểu và sẵn sàng tích hợp vào phần mềm cho người nông dân sử dụng.
 
-## Slide 11: Tổng kết & Hướng phát triển tương lai
+## Slide 10: Tổng kết & Hướng phát triển tương lai
 - **Nội dung hiển thị (Visual):** Tóm tắt 3 điểm mạnh nhất của dự án và các bước tiếp theo.
 - **Phân tích chuyên sâu (In-depth):** 
   - Tổng kết: Hoàn thiện thành công một Pipeline ML hiện đại kết hợp CGAN (Tạo dữ liệu), Transfer Learning (Huấn luyện tối ưu) và XAI (Giải thích minh bạch).
