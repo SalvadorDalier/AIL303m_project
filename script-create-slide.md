@@ -31,15 +31,16 @@
 ## Slide 5: Hàm Tối ưu & Hàm Mất mát (Optimization & Loss Logic)
 - **Nội dung hiển thị (Visual):** Công thức CrossEntropy, tham số thuật toán Adam Optimizer (`lr=1e-3`)
   - Khẳng định bài toán **không sử dụng hàm Sigmoid**. Sigmoid chỉ phù hợp với phân loại đa nhãn độc lập (Multi-label).
-  - Hàm **`CrossEntropyLoss`** trong PyTorch là sự kết hợp của 2 hàm **`LogSoftmax`** và **`NLLLoss`** (Negative Log Likelihood Loss). Softmax đảm bảo tổng xác suất của 2 nơ-ron đầu ra luôn bằng 1 (tạo thành một phân phối xác suất chuẩn). Còn NLLLoss sẽ đóng vai trò "trừng phạt": Nếu máy dự đoán sai mà lại đưa ra % tự tin càng cao thì điểm phạt (Loss) trả về sẽ càng lớn, ép mô hình phải điều chỉnh lại trọng số cho đúng.
+  - Hàm **`CrossEntropyLoss`** trong PyTorch là sự kết hợp của 2 hàm **`LogSoftmax`** và **`NLLLoss`** (Negative Log Likelihood Loss). Softmax đảm bảo tổng xác suất của 2 nơ-ron đầu ra luôn bằng 1 (tạo thành một phân phối xác suất chuẩn). Còn NLLLoss sẽ đóng vai trò phạt trọng số: Nếu máy dự đoán sai mà lại đưa ra % tự tin càng cao thì điểm phạt (Loss) trả về sẽ càng lớn, ép mô hình phải điều chỉnh lại trọng số cho đúng.
   - Ở khâu prediction, để phân giải chốt hạ ảnh thuộc nhãn nào, mô hình sử dụng hàm **`torch.max()` (Argmax)** để lấy index của nơ-ron có số Logit lớn nhất.
   ps: số logit là output của lớp cuối cùng fc ép ma trận lại thành 1 dãy số dài.
 
-## Slide 6: Triển khai Huấn luyện Đám mây (Cloud Computing via Modal)
-- **Nội dung hiển thị (Visual):** Sơ đồ quy trình đẩy luồng huấn luyện lên nền tảng Modal, kiến trúc Cloud Volume.
+## Slide 6: Triển khai Huấn luyện Cục bộ (Local Training với GPU RTX 4060)
+- **Nội dung hiển thị (Visual):** Thông số cấu hình phần cứng (NVIDIA RTX 4060 8GB VRAM) và sơ đồ luồng huấn luyện cục bộ (Local Training Pipeline).
 - **Phân tích chuyên sâu (In-depth):** 
-  - Trình bày kỹ năng MLOps (Machine Learning Operations). Thay vì train cục bộ gây quá tải phần cứng, job được đóng gói và đẩy lên máy chủ đám mây.
-  - Điểm sáng: Tích hợp cơ chế **Persistent Volume** (Ổ cứng ảo). Giải quyết triệt để rủi ro mất kết nối mạng (Network Timeout) trong quá trình train hàng chục epochs kéo dài nhiều giờ; file trọng số (Weights) được lưu an toàn trên mây và kéo về bằng script độc lập.
+  - Toàn bộ 5 mô hình kiến trúc sâu trong dự án đều được triển khai huấn luyện trực tiếp trên môi trường máy tính cá nhân (Local) thông qua sức mạnh tăng tốc phần cứng của card đồ họa **NVIDIA RTX 4060**. 
+  - Việc tận dụng GPU kiến trúc mới với hệ thống nhân CUDA Core giúp tối ưu hóa triệt để tốc độ tính toán đạo hàm và nhân ma trận (Matrix Multiplication), rút ngắn đáng kể thời gian training so với chạy trên CPU hay các dịch vụ Cloud miễn phí.
+  - Hơn nữa, quá trình huấn luyện Local mang lại lợi thế tuyệt đối trong việc giám sát và kiểm soát dòng chảy bộ nhớ (VRAM); nhờ đó, nhóm đã chủ động tinh chỉnh tham số Batch Size linh hoạt để ép các mô hình siêu nặng như VGG hay DenseNet chạy mượt mà mà không lo gặp lỗi tràn bộ nhớ (Out-Of-Memory).
 
 ## Slide 7: Đánh giá Hiệu năng & Đặc tính Mô hình (Evaluation Metrics)
 - **Nội dung hiển thị (Visual):** Bảng tổng hợp Precision, Recall và Confusion Matrix của 5 mô hình.
