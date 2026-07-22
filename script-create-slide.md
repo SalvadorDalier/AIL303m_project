@@ -18,14 +18,13 @@
 ## Slide 3: Chuẩn hóa Đầu vào (Data Preprocessing Pipeline)
 - **Nội dung hiển thị (Visual):** Dòng chảy xử lý ảnh: Raw Image -> Resize (224x224) -> Tensor -> Normalization.
 - **Phân tích chuyên sâu (In-depth):** 
-  - Mọi hình ảnh đều được thay đổi kích thước (Resize) về chuẩn `224x224` pixel (tạo thành dạng tensor `[Batch, 3, 224, 224]`). Lý do rất đơn giản: Các mạng CNN mà nhóm kế thừa (như VGG, ResNet) vốn được thiết kế và huấn luyện trên tập ImageNet với đầu vào mặc định là 224x224. Nếu đưa ảnh sai kích thước, các phép nhân ma trận trọng số (đặc biệt ở các lớp Fully Connected) sẽ bị báo lỗi không khớp chiều (shape mismatch) ngay lập tức.
-  - **Trọng tâm kỹ thuật:** Giải thích lý do phải chuẩn hóa (Normalize) theo `mean=[0.485, 0.456, 0.406]` và `std=[0.229, 0.224, 0.225]`. Đây không phải là con số ngẫu nhiên, mà là dải phân phối thống kê của hàng triệu bức ảnh từ ImageNet. Nếu bỏ qua bước này, không gian vector của ảnh đầu vào sẽ lệch pha với không gian trọng số pre-trained, làm sụp đổ phương pháp Transfer Learning.
-
+  - Mọi hình ảnh phải bị ép về kích thước tensor chuẩn `[B, 3, 224, 224]` để phù hợp với kiến trúc của các mạng CNN mà nhóm đang dùng bao gôm Densenet121, Googlenet22, Resnet50, VGG16-19.
+  - **Trọng tâm kỹ thuật:** `mean=[0.485, 0.456, 0.406]` và `std=[0.229, 0.224, 0.225]`. Đây không phải là con số ngẫu nhiên, mà là dải phân phối thống kê của hàng triệu bức ảnh từ ImageNet được tính theo công thức: x_new = (x_old - mean)/std trên từng không gian màu [R-B-G]
 ## Slide 4: Chiến lược Học chuyển giao (Transfer Learning Architecture)
 - **Nội dung hiển thị (Visual):** Sơ đồ kiến trúc mạng (Ví dụ: DenseNet/VGG), biểu tượng ổ khóa (Freeze) ở phần thân và biểu tượng mở khóa ở phần đuôi Classifier.
 - **Phân tích chuyên sâu (In-depth):** 
   - Dự án khai thác 5 kiến trúc hàng đầu: GoogLeNet, DenseNet-121, ResNet-50, VGG-16, VGG-19.
-  - **Cơ chế hoạt động:** Sử dụng kỹ thuật "Đóng băng" (`requires_grad = False`) cho toàn bộ phần Feature Extractor. Các Convolutional Layers nông đã quá giỏi trong việc nhận diện góc cạnh, và các layer sâu đã quen với pattern phức tạp. Việc đóng băng giúp tránh hiện tượng "Catastrophic Forgetting" (Quên thảm họa) khi train trên miền dữ liệu mới.
+  - **Cơ chế hoạt động:** Sử dụng kỹ thuật "Đóng băng" (`requires_grad = False`) cho toàn bộ phần Feature Extractor. Các lớp Convolution (Tích chập) này vốn đã quá giỏi trong việc nhận diện góc cạnh, vân màu. Việc đóng băng giúp "khóa" chặt và bảo vệ các ma trận trọng số quý giá này; nếu không, những sai số (Loss) khổng lồ ở các epoch đầu tiên sẽ dội ngược lại (backpropagation) và phá hỏng toàn bộ trí nhớ mà mô hình đã cất công học từ tập ImageNet.
   - Sau đó, nhóm tự tinh chỉnh và huấn luyện duy nhất cụm Fully Connected Layer (Classifier) cuối cùng để quy mô hình về bài toán 2 nơ-ron (Healthy/Unhealthy).
 
 ## Slide 5: Hàm Tối ưu & Hàm Mất mát (Optimization & Loss Logic)
